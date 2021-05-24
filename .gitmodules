@@ -1,6 +1,7 @@
 [submodule "elvm/8cc"]
 	path = elvm/8cc
 	url = https://github.com/shinh/8cc
+	branch = eir
 [submodule "elvm/Whitespace"]
 	path = elvm/Whitespace
 	url = https://github.com/koturn/Whitespace

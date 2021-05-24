@@ -51,7 +51,7 @@ all: build
 	@echo '   (WARNING: will take a lot of time/disk)'
 	@echo ''
 
-out/git_submodule.stamp: .git/index
+out/git_submodule.stamp:
 	git submodule update --init
 	touch $@
 
