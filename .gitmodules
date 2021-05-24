@@ -1,0 +1,13 @@
+[submodule "elvm/8cc"]
+	path = elvm/8cc
+	url = https://github.com/shinh/8cc
+[submodule "elvm/Whitespace"]
+	path = elvm/Whitespace
+	url = https://github.com/koturn/Whitespace
+[submodule "elvm/tinycc"]
+	path = elvm/tinycc
+	url = https://github.com/mirror/tinycc
+[submodule "elvm/lci"]
+	path = elvm/lci
+	url = https://github.com/justinmeza/lci
+	branch = future
