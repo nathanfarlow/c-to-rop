@@ -1,7 +1,7 @@
 from angrop_backup.angrop.chain_builder import ChainBuilder
 from angrop_backup.angrop.errors import RopException
 import angr
-from angrop_backup.angrop import *
+from angrop_backup.angrop import * 
 from angrop_backup.angrop.rop_chain import RopChain
 
 # from angrop.rop_chain import RopChain
@@ -15,6 +15,108 @@ class ChainFinder():
         self.rop = rop
         self.gadgets = rop.gadgets
         self.arch = rop.project.arch
+
+    def _get_register_constraints(self, gadget, f_apply_constraints):
+        chain = RopChain(self.rop.project, self.rop, rebase=self.rop._rebase, badbytes=self.rop.badbytes)
+
+        arch_bytes = self.arch.bytes
+        arch_endness = self.arch.memory_endness
+
+        # Create the initial state. This is the state at the start of the gadget
+        pre_state = self.rop._chain_builder._test_symbolic_state.copy()
+        rop_utils.make_reg_symbolic(pre_state, self.rop._chain_builder._base_pointer)
+
+        pre_state.regs.ip = gadget.addr
+        pre_state.add_constraints(
+            pre_state.memory.load(pre_state.regs.sp, arch_bytes, endness=arch_endness) == gadget.addr
+        )
+        pre_state.regs.sp += arch_bytes
+
+        # Create the post state. This is the state after we step through the gadget with the applied constraints
+        post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+
+        # f_apply_constraints should apply more constraints to pre_state, and then return
+        # a post_state that has been stepped through the gadget with those new constraints.
+        # It should return a criteria, which is the target constraint which should be true for all
+        # values. This should also return the registers that we will solve for the initial values
+        post_state, criteria, registers_to_solve = f_apply_constraints(pre_state, post_state)
+
+        pre_state_copy = pre_state.copy()
+        pre_state.add_constraints(criteria)
+        pre_state_copy.add_constraints(criteria == False)
+
+        if not pre_state.solver.satisfiable():
+            raise RopException('Attempted solution is not satisfiable at all')
+
+        if pre_state_copy.solver.satisfiable():
+            raise RopException('Attempted solution is not satisfiable in all cases')
+
+        # Solve for the registers
+        reg_vals = dict()
+        for reg in set(registers_to_solve):
+            reg_vals[reg] = pre_state.solver.eval(pre_state.registers.load(reg))
+
+        # Build the chain
+        chain = self.rop.set_regs(use_partial_controllers=False, **reg_vals)
+        chain.add_gadget(gadget)
+
+        bytes_per_pop = self.arch.bytes
+        chain.add_value(gadget.addr, needs_rebase=True)
+        for _ in range(gadget.stack_change // bytes_per_pop - 1):
+            chain.add_value(self.rop._chain_builder._get_fill_val(), needs_rebase=False)
+        
+        return chain
+
+    @rop_utils.timeout(5)
+    def _try_access_mem(self, is_read, gadget, addr, register):
+
+        def apply_initial_constraints(pre_state, post_state):
+
+            mem_accesses = gadget.mem_reads if is_read else gadget.mem_writes
+            bad_accesses = gadget.mem_writes if is_read else gadget.mem_reads
+
+            # Find the ast which is the mem read/write operation
+            mem_access = mem_accesses[0]
+            the_action = None
+            for a in post_state.history.actions.hardcopy:
+                if a.type != 'mem' or a.action != ('read' if is_read else 'write'):
+                    continue
+
+                if set(rop_utils.get_ast_dependency(a.addr.ast)) == set(mem_access.addr_dependencies) or \
+                    set(rop_utils.get_ast_dependency(a.data.ast)) == set(mem_access.data_dependencies):
+                    the_action = a
+                    break
+
+            if the_action is None:
+                raise RopException("Couldn't find the matching action")
+
+            if is_read:
+                # Set up symbolic variable at memory location
+                to_read = pre_state.solver.BVS('mem', pre_state.arch.bits)
+                pre_state.memory.store(addr, to_read)
+
+            # Constrain the address of the memory access
+            pre_state.add_constraints(the_action.addr.ast == addr)
+            pre_state.options.discard(angr.options.AVOID_MULTIVALUED_READS if is_read else angr.options.AVOID_MULTIVALUED_WRITES)
+            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+
+            if is_read:
+                # Criteria is that the pre state memory is equal to the post state register
+                to_read = pre_state.memory.load(addr, self.arch.bytes, endness=self.arch.memory_endness)
+                criteria = post_state.registers.load(register) == to_read
+            else:
+                # Criteria is that the post state memory is equal to the pre state register
+                criteria = post_state.memory.load(addr, self.arch.bytes, endness=self.arch.memory_endness) == pre_state.registers.load(register)
+
+            # Solve for all registers in dependencies, except for the one we control arbitrarily
+            registers_to_solve = list(mem_access.addr_dependencies) + list(mem_access.data_dependencies)
+            if register in registers_to_solve:
+                registers_to_solve.remove(register)
+
+            return post_state, criteria, registers_to_solve
+
+
+        return self._get_register_constraints(gadget, apply_initial_constraints)
 
     def _find_mem_access_gadgets(self, is_read, register):
         possible_gadgets = set()
@@ -49,73 +151,6 @@ class ChainFinder():
                     break
 
         yield from possible_gadgets
-
-    
-    @rop_utils.timeout(5)
-    def _try_access_mem(self, is_read, gadget, addr, register):
-        chain = RopChain(self.rop.project, self.rop, rebase=self.rop._rebase, badbytes=self.rop.badbytes)
-        
-        mem_accesses = gadget.mem_reads if is_read else gadget.mem_writes
-        bad_accesses = gadget.mem_writes if is_read else gadget.mem_reads
-
-        arch_bytes = self.arch.bytes
-        arch_endness = self.arch.memory_endness
-
-        pre_gadget_state = self.rop._chain_builder._test_symbolic_state.copy()
-        rop_utils.make_reg_symbolic(pre_gadget_state, self.rop._chain_builder._base_pointer)
-
-        pre_gadget_state.regs.ip = gadget.addr
-        pre_gadget_state.add_constraints(
-            pre_gadget_state.memory.load(pre_gadget_state.regs.sp, arch_bytes, endness=arch_endness) == gadget.addr
-        )
-        pre_gadget_state.regs.sp += arch_bytes
-
-        state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_gadget_state)
-
-        mem_access = mem_accesses[0]
-        the_action = None
-        for a in state.history.actions.hardcopy:
-            if a.type != 'mem' or a.action != ('read' if is_read else 'write'):
-                continue
-
-            if set(rop_utils.get_ast_dependency(a.addr.ast)) == set(mem_access.addr_dependencies) or \
-                set(rop_utils.get_ast_dependency(a.data.ast)) == set(mem_access.data_dependencies):
-                the_action = a
-                break
-
-        if the_action is None:
-            raise RopException("Couldn't find the matching action")
-
-        if is_read:
-            to_read = pre_gadget_state.solver.BVS('mem', state.arch.bits)
-            pre_gadget_state.memory.store(addr, to_read)
-
-        # Constrain the address
-        pre_gadget_state.add_constraints(the_action.addr.ast == addr)
-        pre_gadget_state.options.discard(angr.options.AVOID_MULTIVALUED_READS if is_read else angr.options.AVOID_MULTIVALUED_WRITES)
-        state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_gadget_state)
-
-        if is_read:
-            pre_gadget_state.add_constraints(state.registers.load(register) == to_read)
-        else:
-            pre_gadget_state.add_constraints(state.memory.load(addr, arch_bytes) == pre_gadget_state.registers.load(register))
-
-        #test sat
-
-        all_deps = list(mem_access.addr_dependencies) + list(mem_access.data_dependencies)
-        reg_vals = dict()
-        for reg in set(all_deps) - set([register]):
-            reg_vals[reg] = pre_gadget_state.solver.eval(pre_gadget_state.registers.load(reg))
-        
-        chain = self.rop.set_regs(use_partial_controllers=False, **reg_vals)
-        chain.add_gadget(gadget)
-
-        bytes_per_pop = self.arch.bytes
-        chain.add_value(gadget.addr, needs_rebase=True)
-        for _ in range(gadget.stack_change // bytes_per_pop - 1):
-            chain.add_value(self.rop._chain_builder._get_fill_val(), needs_rebase=False)
-        
-        return chain
 
     def _access_mem(self, is_read, addr, register):
         valid = []
