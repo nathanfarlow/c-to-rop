@@ -1,3 +1,4 @@
+from angrop_backup.angrop.rop_gadget import RopGadget
 from angrop_backup.angrop.chain_builder import ChainBuilder
 from angrop_backup.angrop.errors import RopException
 import angr
@@ -15,6 +16,21 @@ class ChainFinder():
         self.rop = rop
         self.gadgets = rop.gadgets
         self.arch = rop.project.arch
+
+    def _gadget_has_no_mem_reads(self, g: RopGadget):
+        return g.mem_reads == 0
+
+    def _gadget_has_no_mem_writes(self, g: RopGadget):
+        return g.mem_writes + g.mem_changes == 0
+    
+    def _gadget_has_no_mem_access(self, g: RopGadget):
+        return self._gadget_has_no_mem_reads(g) and self._gadget_has_no_mem_writes(g)
+
+    def _gadget_has_one_mem_access(self, g: RopGadget):
+        return g.mem_reads + g.mem_writes + g.mem_changes == 1
+
+    def _gadget_is_safe(self, g: RopGadget):
+        return not g.bp_moves_to_sp and g.stack_change > 0
 
     def _get_register_constraints(self, gadget, f_apply_constraints):
         chain = RopChain(self.rop.project, self.rop, rebase=self.rop._rebase, badbytes=self.rop.badbytes)
@@ -57,7 +73,9 @@ class ChainFinder():
             reg_vals[reg] = pre_state.solver.eval(pre_state.registers.load(reg))
 
         # Build the chain
-        chain = self.rop.set_regs(use_partial_controllers=False, **reg_vals)
+        if len(reg_vals) > 0:
+            chain = self.rop.set_regs(use_partial_controllers=False, **reg_vals)
+        
         chain.add_gadget(gadget)
 
         bytes_per_pop = self.arch.bytes
@@ -150,7 +168,7 @@ class ChainFinder():
                     possible_gadgets.add(g)
                     break
 
-        yield from possible_gadgets
+        return possible_gadgets
 
     def _access_mem(self, is_read, addr, register):
         valid = []
@@ -161,9 +179,56 @@ class ChainFinder():
                 pass
         
         return sorted((chain for chain in valid if chain is not None), key=lambda x: x.payload_len)
-    
+
     def read_mem_to_register(self, addr, register):
         return self._access_mem(True, addr, register)
 
     def write_register_to_mem(self, addr, register):
         return self._access_mem(False, addr, register)
+
+    def _try_add_registers(self, gadget, reg1, reg2, reg_dest):
+        
+        def apply_initial_constraints(pre_state, post_state):
+
+            a = pre_state.registers.load(reg1)
+            b = pre_state.registers.load(reg2)
+            c = post_state.registers.load(reg_dest)
+
+            criteria = a + b == c
+
+            return post_state, criteria, []
+
+        return self._get_register_constraints(gadget, apply_initial_constraints)
+
+
+    def _find_add_registers_gadgets(self, reg1, reg2, reg_dest):
+        possible_gadgets = set()
+
+        for g in self.gadgets:
+            # Skip any mem accesses for now. In the future, we can add
+            # support for if we control the mem access
+            if not self._gadget_is_safe(g):
+                continue
+
+            if reg_dest not in g.changed_regs or reg_dest not in g.reg_dependencies:
+                continue
+
+            deps = g.reg_dependencies[reg_dest]
+
+            if reg1 not in deps or reg2 not in deps:
+                continue
+        
+            possible_gadgets.add(g)
+        
+        return possible_gadgets
+
+    def add_reg_to_reg(self, reg1, reg2, reg_dest):
+        
+        valid = []
+        for gadget in self._find_add_registers_gadgets(reg1, reg2, reg_dest):
+            try:
+                valid.append(self._try_add_registers(gadget, reg1, reg2, reg_dest))
+            except (RopException, angr.errors.SimEngineError):
+                pass
+        
+        return sorted((chain for chain in valid if chain is not None), key=lambda x: x.payload_len)
