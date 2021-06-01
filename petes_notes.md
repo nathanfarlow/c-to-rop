@@ -42,7 +42,9 @@ r2 has ROP searches. Needs to be explored. See [here](https://r2wiki.readthedocs
 Random resources:
    + https://marcoramilli.com/2011/08/06/rop-conditional-jumps/
    + https://resources.infosecinstitute.com/topic/return-oriented-programming-rop-attacks/
-
+   + https://web.archive.org/web/20120706113115/http://marcoramilli.blogspot.com/2011/08/rop-how-to-make-comparisons.html
++ https://www.cpe.ku.ac.th/~paruj/204554/blackhat08.pdf Slide 24
++ https://course.cs.tau.ac.il/infosec16/sites/drupal-courses.cs.tau.ac.il.infosec16/files/Infosec-R5-ROP.pdf Slide 18
 
 So the idea is to add a certain value to the current stack pointer (ESP) based on the result of some compution. Or, just move this certain value to desired address / memory location.
 
