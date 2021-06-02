@@ -1,11 +1,15 @@
-class Parser:
-    line : str
-    idx : int
-    segment : str
-    label : str
+from typing import Dict, List
 
-    def __init__(self):
-        pass
+
+
+class Parser:
+    line: str
+    idx: int
+    segment: str
+    data_symbols: Dict[str, int]
+    text_symbols: Dict[str, int]
+    data_elements: List[int]
+    text_elements: List[Instr]
 
     def eat_whitespace(self):
         while self.idx < len(self.line) and self.peek() in ' \t':
@@ -23,6 +27,8 @@ class Parser:
         return self.line[self.idx]
 
     def parse_file(self, file):
+        self.data_symbols = {}
+        self.text_symbols = {}
         for lineno, self.line in enumerate(file):
             self.idx = 0
             self.eat_whitespace()
@@ -42,21 +48,24 @@ class Parser:
                 elif pseudo == "long":
                     self.eat_whitespace()
                     i = int(self.line[self.idx:])
-                    # todo
+                    self.data_elements.append(i)
                 elif pseudo == "string":
                     self.eat_whitespace()
                     if not (self.peek() == "\"" and self.line[-2] == "\""):
                         return "found .string but couldn't understand string literal"
                     string = self.line[self.idx+1:-2]
                     string = string.encode("ascii").decode("unicode_escape")
-                    # todo
+                    self.data_elements.extend(string.encode("ascii"))
+                    self.data_elements.append(0)
                 else:
                     return "bad pseudo-op"
 
             word = self.get_word()
             if self.peek() == ":":
-                self.label = word
-                # todo
+                # label
+                symbol_table, elements = {"data": (data_symbols, data_elements),
+                                          "text": (text_symbols, text_elements)}[self.segment]
+                symbol_table[word] = len(elements)
             elif word in ("mov", "add", "sub", "load", "store", "putc", "getc", "exit",
                           "jeq", "jne", "jlt", "jgt", "jle", "jge", "jmp"
                           "eq", "ne", "lt", "gt", "le", "ge"):
