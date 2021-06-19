@@ -1,6 +1,4 @@
-from atexit import register
 import functools
-from os import write
 from angrop_backup.angrop import rop_utils
 import angr
 from angrop import *
@@ -270,7 +268,6 @@ class ChainFinder():
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
 
             a = pre_state.registers.load(reg)
-            
             b = pre_state.memory.load(addr_dest, self.arch.bytes, endness=self.arch.memory_endness)
             c = post_state.memory.load(addr_dest, self.arch.bytes, endness=self.arch.memory_endness)
 
@@ -304,6 +301,42 @@ class ChainFinder():
                                         partial(self._try_add_register_to_mem, reg, addr_dest))
 
 
+    def _try_add_mem_to_register(self, addr_src, reg, gadget):
+        
+        def get_final_constraints(pre_state):
+            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+
+            a = pre_state.registers.load(reg)
+            b = pre_state.memory.load(addr_src, self.arch.bytes, endness=self.arch.memory_endness)
+            c = post_state.registers.load(reg)
+
+            return [a + b == c]
+
+        return self._get_register_constraints(gadget,
+                        partial(self.generic_mem_access_get_initial_constraints, gadget.mem_reads, None, addr_src, {reg}),
+                        get_final_constraints)
+     
+
+    def _find_add_mem_to_register_gadgets(self, reg):
+        possible_gadgets = set()
+
+        for g in self.gadgets:
+
+            if reg not in g.changed_regs:
+                continue
+
+            if len(g.mem_reads) != 1 or len(g.mem_changes) + len(g.mem_writes) > 0:
+                continue
+
+            if g.mem_reads[0].data_size != self.arch.bits:
+                continue
+            
+            possible_gadgets.add(g)
+        
+        return possible_gadgets
+
+
     def add_mem_to_register(self, addr_src, reg):
         '''reg = *(int64_t*)addr_src'''
-        pass
+        return self._try_all_gadgets(self._find_add_mem_to_register_gadgets(reg),
+                                        partial(self._try_add_mem_to_register, addr_src, reg))
