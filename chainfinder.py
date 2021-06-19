@@ -1,3 +1,5 @@
+from atexit import register
+import functools
 from os import write
 from angrop_backup.angrop import rop_utils
 import angr
@@ -8,9 +10,9 @@ from angrop.errors import RopException
 
 import claripy
 
-from functools import partial, reduce
+from functools import partial
 
-# NOTE: Lots of code in this file is directly copied/modified from angrop
+# NOTE: Some code in this file is directly copied/modified from angrop
 
 class ChainFinder():
 
@@ -19,20 +21,26 @@ class ChainFinder():
         self.gadgets = rop.gadgets
         self.arch = rop.project.arch
 
+
     def _gadget_has_no_mem_reads(self, g: RopGadget):
         return g.mem_reads == 0
+
 
     def _gadget_has_no_mem_writes(self, g: RopGadget):
         return g.mem_writes + g.mem_changes == 0
     
+
     def _gadget_has_no_mem_access(self, g: RopGadget):
         return self._gadget_has_no_mem_reads(g) and self._gadget_has_no_mem_writes(g)
+
 
     def _gadget_has_one_mem_access(self, g: RopGadget):
         return g.mem_reads + g.mem_writes + g.mem_changes == 1
 
+
     def _gadget_is_safe(self, g: RopGadget):
         return not g.bp_moves_to_sp and g.stack_change > 0
+
 
     def _try_all_gadgets(self, gadgets, gadget_runner):
         valid = []
@@ -46,6 +54,7 @@ class ChainFinder():
                 pass
         
         return sorted(valid, key=lambda x: x.payload_len)
+
 
     def _get_register_constraints(self, gadget, get_initial_constraints, get_final_constraints):
         chain = RopChain(self.rop.project, self.rop, rebase=self.rop._rebase, badbytes=self.rop.badbytes)
@@ -105,21 +114,18 @@ class ChainFinder():
         
         return chain
 
-    @rop_utils.timeout(5)
-    def _try_access_mem(self, is_read, addr, register, gadget):
 
-        def get_initial_constraints(pre_state):
-            pre_state.options.discard(angr.options.AVOID_MULTIVALUED_READS if is_read else angr.options.AVOID_MULTIVALUED_WRITES)
+    def generic_mem_access_get_initial_constraints(self, mem_accesses, action, addr, ignore_registers, pre_state):
+            # pre_state.options.discard(angr.options.AVOID_MULTIVALUED_READS)
+            # pre_state.options.discard(angr.options.AVOID_MULTIVALUED_WRITES)
+
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
-
-            mem_accesses = gadget.mem_reads if is_read else gadget.mem_writes
-            bad_accesses = gadget.mem_writes if is_read else gadget.mem_reads
 
             # Find the ast which is the mem read/write operation
             mem_access = mem_accesses[0]
             the_action = None
             for a in post_state.history.actions.hardcopy:
-                if a.type != 'mem' or a.action != ('read' if is_read else 'write'):
+                if a.type != 'mem' or (action and action != a.action):
                     continue
 
                 if set(rop_utils.get_ast_dependency(a.addr.ast)) == set(mem_access.addr_dependencies) or \
@@ -138,11 +144,13 @@ class ChainFinder():
             initial_constraint = the_action.addr.ast == addr
 
             # Solve for all registers in dependencies, except for the one we control arbitrarily
-            registers_to_solve = list(mem_access.addr_dependencies) + list(mem_access.data_dependencies)
-            if register in registers_to_solve:
-                registers_to_solve.remove(register)
+            registers_to_solve = list(mem_access.addr_dependencies.union(mem_access.data_dependencies) - ignore_registers)
 
             return [initial_constraint], registers_to_solve
+    
+
+    @rop_utils.timeout(5)
+    def _try_access_mem(self, is_read, addr, register, gadget):
 
         def get_final_constraints(pre_state):
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
@@ -156,7 +164,12 @@ class ChainFinder():
 
             return [constraint]
 
-        return self._get_register_constraints(gadget, get_initial_constraints, get_final_constraints)
+        mem_accesses, action = (gadget.mem_reads, 'read') if is_read else (gadget.mem_writes, 'write')
+
+        return self._get_register_constraints(gadget,
+                        functools.partial(self.generic_mem_access_get_initial_constraints, mem_accesses, action, addr, {register}),
+                        get_final_constraints)
+
 
     def _find_mem_access_gadgets(self, is_read, register):
         possible_gadgets = set()
@@ -192,15 +205,19 @@ class ChainFinder():
 
         return possible_gadgets
 
+
     def _access_mem(self, is_read, addr, register):
         return self._try_all_gadgets(self._find_mem_access_gadgets(is_read, register),
                                         partial(self._try_access_mem, is_read, addr, register))
 
+
     def read_mem_to_register(self, addr, register):
         return self._access_mem(True, addr, register)
 
+
     def write_register_to_mem(self, addr, register):
         return self._access_mem(False, addr, register)
+
 
     def _try_add_register_to_register(self, reg1, reg2, gadget):
         
@@ -240,6 +257,7 @@ class ChainFinder():
         
         return possible_gadgets
 
+
     def add_register_to_register(self, reg1, reg2):
         '''reg2 = reg1 + reg2'''
         return self._try_all_gadgets(self._find_add_register_to_register_gadgets(reg1, reg2),
@@ -248,37 +266,6 @@ class ChainFinder():
     
     def _try_add_register_to_mem(self, reg, addr_dest, gadget):
         
-        def get_initial_constraints(pre_state):
-
-            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
-
-            mem_access = gadget.mem_changes[0]
-            the_action = None
-            for a in post_state.history.actions.hardcopy:
-                if a.type != 'mem':
-                    continue
-
-                if set(rop_utils.get_ast_dependency(a.addr.ast)) == set(mem_access.addr_dependencies) or \
-                    set(rop_utils.get_ast_dependency(a.data.ast)) == set(mem_access.data_dependencies):
-                    the_action = a
-                    break
-
-            if the_action is None:
-                raise RopException("Couldn't find the matching action")
-            
-            to_read = pre_state.solver.BVS('mem', pre_state.arch.bits)
-            pre_state.memory.store(addr_dest, to_read)
-
-            # Constrain the address of the memory access
-            constraints = [the_action.addr.ast == addr_dest]
-
-            # Solve for all registers in dependencies, except for the one we control arbitrarily
-            registers_to_solve = list(mem_access.addr_dependencies) + list(mem_access.data_dependencies)
-            if reg in registers_to_solve:
-                registers_to_solve.remove(reg)
-
-            return constraints, registers_to_solve
-
         def get_final_constraints(pre_state):
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
 
@@ -289,16 +276,17 @@ class ChainFinder():
 
             return [a + b == c]
 
-        return self._get_register_constraints(gadget, get_initial_constraints, get_final_constraints)
+        return self._get_register_constraints(gadget,
+                        partial(self.generic_mem_access_get_initial_constraints, gadget.mem_changes, None, addr_dest, {reg}),
+                        get_final_constraints)
+       
 
-
-    def _find_add_register_to_mem_gadgets(self, reg1):
+    def _find_add_register_to_mem_gadgets(self, reg):
         possible_gadgets = set()
 
         for g in self.gadgets:
-            # Skip any mem accesses for now. In the future, we can add
-            # support for if we control the mem access
 
+            # TODO: We could better filter by checking the mem change depends on reg
             if len(g.mem_changes) != 1 or len(g.mem_reads) + len(g.mem_writes) > 0:
                 continue
 
@@ -309,11 +297,13 @@ class ChainFinder():
         
         return possible_gadgets
 
+
     def add_register_to_mem(self, reg, addr_dest):
         '''*(int64_t*)addr_dest = reg + *(int64_t*)addr_dest'''
         return self._try_all_gadgets(self._find_add_register_to_mem_gadgets(reg),
                                         partial(self._try_add_register_to_mem, reg, addr_dest))
 
-    def add_mem_to_register(self, addr_dest, reg):
-        '''reg = *(int64_t*)addr_dest'''
+
+    def add_mem_to_register(self, addr_src, reg):
+        '''reg = *(int64_t*)addr_src'''
         pass
