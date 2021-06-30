@@ -21,11 +21,11 @@ class ChainFinder():
 
 
     def _gadget_has_no_mem_reads(self, g: RopGadget):
-        return g.mem_reads == 0
+        return len(g.mem_reads) == 0
 
 
     def _gadget_has_no_mem_writes(self, g: RopGadget):
-        return g.mem_writes + g.mem_changes == 0
+        return len(g.mem_writes) + len(g.mem_changes) == 0
     
 
     def _gadget_has_no_mem_access(self, g: RopGadget):
@@ -37,7 +37,7 @@ class ChainFinder():
 
 
     def _gadget_is_safe(self, g: RopGadget):
-        return not g.bp_moves_to_sp and g.stack_change > 0
+        return not g.bp_moves_to_sp and g.stack_change > 0 and not g.makes_syscall
 
 
     def _try_all_gadgets(self, gadgets, gadget_runner):
@@ -340,3 +340,74 @@ class ChainFinder():
         '''reg = *(int64_t*)addr_src'''
         return self._try_all_gadgets(self._find_add_mem_to_register_gadgets(reg),
                                         partial(self._try_add_mem_to_register, addr_src, reg))
+
+
+    def _try_cmp_register_to_register(self, reg1, reg2, gadget):
+
+        def get_initial_constraints(pre_state):
+            return [], []
+
+        def get_regs(pre_state):
+            r1, r2 = pre_state.registers.load(reg1), pre_state.registers.load(reg2)
+            return r1, r2, r1 - r2
+
+        def get_flags(post_state):
+            '''return ZF, CF, SF, OF'''
+            rflags = post_state.regs.rflags
+            return rflags[6] == 1, rflags[0] == 1, rflags[7] == 1, rflags[11] == 1
+
+        def check_equal(pre_state):
+            r1, r2, result = get_regs(pre_state)
+            pre_state.add_constraints(r1 == r2)
+            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+            ZF, CF, SF, OF = get_flags(post_state)
+            constraints = [ZF]
+            return constraints
+
+        def check_not_equal(pre_state):
+            r1, r2, result = get_regs(pre_state)
+            pre_state.add_constraints(r1 != r2)
+            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+            ZF, CF, SF, OF = get_flags(post_state)
+            constraints = [claripy.Not(ZF)]
+            return constraints
+
+        def check_less_than(pre_state):
+            r1, r2, result = get_regs(pre_state)
+            pre_state.add_constraints(r1.SLT(r2))
+            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+            ZF, CF, SF, OF = get_flags(post_state)
+            constraints = [SF != OF]
+            return constraints
+
+        def check_greater_than(pre_state):
+            r1, r2, result = get_regs(pre_state)
+            pre_state.add_constraints(r1.SGT(r2))
+            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+            ZF, CF, SF, OF = get_flags(post_state)
+            constraints = [claripy.Not(ZF), SF == OF]
+            return constraints
+
+        try:
+            for check in (check_less_than, check_greater_than,
+                            check_equal, check_not_equal):
+                ret = self._get_register_constraints(gadget, get_initial_constraints, check)
+            
+            return ret
+        except:
+            pass
+
+
+    def _find_cmp_register_to_register_gadgets(self, reg1, reg2):
+        possible_gadgets = set()
+
+        for g in self.gadgets:
+            if self._gadget_is_safe(g) and self._gadget_has_no_mem_access(g):
+                possible_gadgets.add(g)
+
+        return possible_gadgets
+
+    def cmp_reg_to_reg(self, reg1, reg2):
+        '''cmp reg1, reg2'''
+        return self._try_all_gadgets(self._find_cmp_register_to_register_gadgets(reg1, reg2),
+                                        partial(self._try_cmp_register_to_register, reg1, reg2))
