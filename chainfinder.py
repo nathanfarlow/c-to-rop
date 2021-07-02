@@ -407,7 +407,23 @@ class ChainFinder():
 
         return possible_gadgets
 
+
     def cmp_reg_to_reg(self, reg1, reg2):
         '''cmp reg1, reg2'''
         return self._try_all_gadgets(self._find_cmp_register_to_register_gadgets(reg1, reg2),
                                         partial(self._try_cmp_register_to_register, reg1, reg2))
+
+
+    def pop_bytes(self, num_bytes):
+        '''Find gadgets that increment the stack pointer'''
+
+        possible_gadgets = set()
+
+        for g in self.gadgets:
+            if self._gadget_is_safe(g) and self._gadget_has_no_mem_access(g) and g.stack_change - self.arch.bytes == num_bytes:
+                chain = RopChain(self.rop.project, None)
+                chain.add_gadget(g)
+                chain.add_value(g.addr, needs_rebase=True)
+                possible_gadgets.add(chain)
+        
+        return possible_gadgets
