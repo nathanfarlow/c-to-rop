@@ -401,7 +401,15 @@ class ChainFinder():
 
         for g in self.gadgets:
             if self._gadget_is_safe(g) and self._gadget_has_no_mem_access(g):
-                possible_gadgets.add(g)
+                # Really not proud of this hack, but we need to eliminate more gadgets.
+                # Otherwise, analysis of a medium sized binary takes 17+ hours.
+                # This kind of defeats the point of angr and is architecture dependent.
+                # There are definitely better ways to do this symbolically by looking at the ast
+                disassembly = rop_utils.gadget_to_asmstring(self.rop.project, g)
+
+                # Yikes
+                if 'cmp' in disassembly or 'sub' in disassembly:
+                    possible_gadgets.add(g)
 
         return possible_gadgets
 
