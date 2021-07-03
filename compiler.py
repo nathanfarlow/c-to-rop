@@ -1,61 +1,61 @@
 from multimethod import multimeta
-from eir.types import ConditionCode, Immediate, JumpTarget, Register
+from eir.types import ConditionCode, Immediate, Register
 
 
 class Compiler(metaclass=multimeta):
     def put_mov(self, dst: Register, src: Immediate):
-        pass
+        print("movRI")
 
     def put_mov(self, dst: Register, src: Register):
-        pass
+        print("movRR")
 
     def put_add(self, dst: Register, src: Immediate):
-        pass
+        print("addRI")
 
     def put_add(self, dst: Register, src: Register):
-        pass
+        print("addRR")
 
     def put_sub(self, dst: Register, src: Immediate):
-        pass
+        print("subRI")
 
     def put_sub(self, dst: Register, src: Register):
-        pass
+        print("subRR")
 
     def put_load(self, dst: Register, src: Immediate):
-        pass
+        print("loadRI")
 
     def put_load(self, dst: Register, src: Register):
-        pass
+        print("loadRR")
 
     def put_store(self, src: Register, dst: Immediate):
-        pass
+        print("storeRI")
 
     def put_store(self, src: Register, dst: Register):
-        pass
+        print("storeRR")
 
     def put_putc(self, src: Immediate):
-        pass
+        print("putcI")
 
     def put_putc(self, src: Register):
-        pass
+        print("putcR")
 
     def put_getc(self, dst: Register):
-        pass
+        print("getcR")
 
     def put_exit(self):
-        pass
+        print("exit")
 
-    def put_conditional_jmp(self, jmp: JumpTarget, dst: Register, src: Immediate, cc: ConditionCode):
-        pass
+    def put_conditional_jmp(self, jmp: Immediate, dst: Register, src: Immediate, cc: ConditionCode):
+        print("cond_jmpIRI")
 
-    def put_conditional_jmp(self, jmp: JumpTarget, dst: Register, src: Register, cc: ConditionCode):
-        pass
+    def put_conditional_jmp(self, jmp: Immediate, dst: Register, src: Register, cc: ConditionCode):
+        print("cond_jmpIRR")
 
-    def put_unconditional_jmp(self, jmp: JumpTarget):
-        pass
+    def put_unconditional_jmp(self, jmp: Immediate):
+        print("jmpI")
 
     def put_cmp(self, dst: Register, src: Immediate, cc: ConditionCode):
-        pass
+        print("cmpRI")
 
     def put_cmp(self, dst: Register, src: Register, cc: ConditionCode):
-        pass
+        print("cmpRR")

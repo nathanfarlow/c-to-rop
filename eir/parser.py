@@ -2,11 +2,11 @@ from __future__ import annotations # PEP 563. It will become the default in Pyth
 
 import string
 from typing import Dict, List, NamedTuple, TextIO, Union
-from .types import ConditionCode, Immediate, JumpTarget, Register
 
 class Instr(NamedTuple):
     opcode: str
-    args: List[Union[Immediate, JumpTarget, Register]]
+    args: List[str]
+    original_assembly: str
 
 class Parser:
     def __init__(self, file: TextIO):
@@ -48,7 +48,7 @@ class Parser:
             # label
             assert self.idx == len(self.line) - 2
             elements = {"data": self.data_elements, "text": self.text_elements}[self.segment]
-            self.symbol_table[first_word[:-1]] = len(elements)
+            self.symbol_table[first_word] = len(elements)
         elif first_word[0] == ".":
             # pseudo-op
             if first_word == ".text":
@@ -89,7 +89,7 @@ class Parser:
                     self.eat_whitespace()
                 else:
                     assert self.peek() == "\n", ParserError(self, "unknown character: " + repr(self.peek()))
-            self.text_elements.append(Instr(opcode, args))
+            self.text_elements.append(Instr(opcode, args, self.line.strip()))
         else:
             raise ParserError(self, "unknown instruction: " + repr(first_word))
 

@@ -11,12 +11,10 @@ class ConditionCode(enum.Enum):
 
 
 class Immediate(int):
-    pass
-
-
-class JumpTarget(int):
-    pass
+    def __repr__(self):
+        return f"Immediate({super().__repr__()})"
 
 
 class Register(str):
-    pass
+    def __repr__(self):
+        return f"Register({super().__repr__()})"
