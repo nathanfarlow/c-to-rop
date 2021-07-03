@@ -24,7 +24,7 @@ class Compiler:
     def put_getc(dst):
         pass
 
-    def put_exit(dst):
+    def put_exit():
         pass
 
     def put_conditional_jmp(jmp, dst, src, cc):
