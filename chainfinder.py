@@ -412,21 +412,6 @@ class ChainFinder():
                                         partial(self._try_cmp_register_to_register, reg1, reg2))
 
 
-    def pop_bytes(self, num_bytes):
-        '''Find gadgets that increment the stack pointer'''
-
-        possible_gadgets = set()
-
-        for g in self.gadgets:
-            if self._gadget_is_safe(g) and self._gadget_has_no_mem_access(g) and g.stack_change - self.arch.bytes == num_bytes:
-                chain = RopChain(self.rop.project, None)
-                chain.add_gadget(g)
-                chain.add_value(g.addr, needs_rebase=True)
-                possible_gadgets.add(chain)
-        
-        return possible_gadgets
-
-
     def _find_modify_register_gadgets(self, reg):
         possible_gadgets = set()
 
@@ -442,7 +427,6 @@ class ChainFinder():
             return [], []
 
         def check_zero_flag_set(ZF, pre_state):
-            # set ZF
             pre_state.registers.store('rflags', ZF << 6)
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
             reg_val = post_state.registers.load(reg)[7:0]
@@ -481,3 +465,31 @@ class ChainFinder():
         '''setl reg'''
         return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
                                         partial(self._try_set_less_than, reg))
+
+
+    def pop_bytes(self, num_bytes):
+        '''Find gadgets that increment the stack pointer'''
+
+        possible_gadgets = set()
+
+        for g in self.gadgets:
+            if self._gadget_is_safe(g) and self._gadget_has_no_mem_access(g) and g.stack_change - self.arch.bytes == num_bytes:
+                chain = RopChain(self.rop.project, None)
+                chain.add_gadget(g)
+                chain.add_value(g.addr, needs_rebase=True)
+                possible_gadgets.add(chain)
+        
+        return possible_gadgets
+
+
+    def syscall(self):
+        possible_gadgets = set()
+
+        for g in self.gadgets:
+            if not g.bp_moves_to_sp and g.stack_change > 0 and self._gadget_has_no_mem_access(g) and g.makes_syscall:
+                chain = RopChain(self.rop.project, None)
+                chain.add_gadget(g)
+                chain.add_value(g.addr, needs_rebase=True)
+                possible_gadgets.add(chain)
+        
+        return possible_gadgets
