@@ -1,61 +1,85 @@
+from abc import ABCMeta, abstractmethod
 from multimethod import multimeta
 from eir.types import ConditionCode, Immediate, Register
 
 
-class Compiler(metaclass=multimeta):
+class ABCMultiMeta(ABCMeta, multimeta):
+    pass
+
+
+class Target(metaclass=ABCMultiMeta):
+    @abstractmethod
     def put_mov(self, dst: Register, src: Immediate):
-        print("movRI")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_mov(self, dst: Register, src: Register):
-        print("movRR")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_add(self, dst: Register, src: Immediate):
-        print("addRI")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_add(self, dst: Register, src: Register):
-        print("addRR")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_sub(self, dst: Register, src: Immediate):
-        print("subRI")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_sub(self, dst: Register, src: Register):
-        print("subRR")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_load(self, dst: Register, src: Immediate):
-        print("loadRI")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_load(self, dst: Register, src: Register):
-        print("loadRR")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_store(self, src: Register, dst: Immediate):
-        print("storeRI")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_store(self, src: Register, dst: Register):
-        print("storeRR")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_putc(self, src: Immediate):
-        print("putcI")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_putc(self, src: Register):
-        print("putcR")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_getc(self, dst: Register):
-        print("getcR")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_exit(self):
-        print("exit")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_conditional_jmp(self, jmp: Immediate, dst: Register, src: Immediate, cc: ConditionCode):
-        print("cond_jmpIRI")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_conditional_jmp(self, jmp: Immediate, dst: Register, src: Register, cc: ConditionCode):
-        print("cond_jmpIRR")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_unconditional_jmp(self, jmp: Immediate):
-        print("jmpI")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_cmp(self, dst: Register, src: Immediate, cc: ConditionCode):
-        print("cmpRI")
+        raise NotImplementedError
 
+    @abstractmethod
     def put_cmp(self, dst: Register, src: Register, cc: ConditionCode):
-        print("cmpRR")
+        raise NotImplementedError
