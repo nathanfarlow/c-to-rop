@@ -1,7 +1,5 @@
-import functools
-from angrop_backup.angrop import rop_utils
 import angr
-from angrop import *
+from angrop import rop_utils
 from angrop.rop_gadget import RopGadget
 from angrop.rop_chain import RopChain
 from angrop.errors import RopException
@@ -10,7 +8,23 @@ import claripy
 
 from functools import partial
 
-# NOTE: Some code in this file is directly copied/modified from angrop
+
+# Some code in this file is directly copied/modified from angrop
+
+
+class ParameterizedGadget():
+
+    def __init__(self, gadget, expected_payload_len, builder):
+        self.gadget = gadget
+        self.expected_payload_len = expected_payload_len
+        self.builder = builder
+
+    def build(self, *args) -> RopChain:
+        return self.builder(*args, self.gadget)
+
+    def __repr__(self) -> str:
+        return f'Expected payload length: {self.expected_payload_len}\n{str(self.gadget)}'
+
 
 class ChainFinder():
 
@@ -46,18 +60,18 @@ class ChainFinder():
         return rflags[6] == 1, rflags[0] == 1, rflags[7] == 1, rflags[11] == 1
 
 
-    def _try_all_gadgets(self, gadgets, gadget_runner):
+    def _try_all_gadgets(self, gadgets, gadget_runner, *args):
         valid = []
 
         for g in gadgets:
             try:
-                chain = gadget_runner(g)
+                chain = gadget_runner(*args, g)
                 if chain is not None:
-                    valid.append(chain)
+                    valid.append(ParameterizedGadget(g, chain.payload_len, gadget_runner))
             except (RopException, angr.errors.SimEngineError):
                 pass
         
-        return sorted(valid, key=lambda x: x.payload_len)
+        return sorted(valid, key=lambda x: x.expected_payload_len)
 
 
     def _get_register_constraints(self, gadget, get_initial_constraints, get_final_constraints):
@@ -120,9 +134,7 @@ class ChainFinder():
 
 
     def generic_mem_access_get_initial_constraints(self, mem_accesses, action, addr, ignore_registers, pre_state):
-            # pre_state.options.discard(angr.options.AVOID_MULTIVALUED_READS)
-            # pre_state.options.discard(angr.options.AVOID_MULTIVALUED_WRITES)
-
+            
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
 
             # Find the ast which is the mem read/write operation
@@ -171,7 +183,7 @@ class ChainFinder():
         mem_accesses, action = (gadget.mem_reads, 'read') if is_read else (gadget.mem_writes, 'write')
 
         return self._get_register_constraints(gadget,
-                        functools.partial(self.generic_mem_access_get_initial_constraints, mem_accesses, action, addr, {register}),
+                        partial(self.generic_mem_access_get_initial_constraints, mem_accesses, action, addr, {register}),
                         get_final_constraints)
 
 
@@ -212,7 +224,7 @@ class ChainFinder():
 
     def _access_mem(self, is_read, addr, register):
         return self._try_all_gadgets(self._find_mem_access_gadgets(is_read, register),
-                                        partial(self._try_access_mem, is_read, addr, register))
+                                        self._try_access_mem, is_read, addr, register)
 
 
     def read_mem_to_register(self, addr, register):
@@ -265,7 +277,7 @@ class ChainFinder():
     def add_register_to_register(self, reg1, reg2):
         '''reg2 = reg1 + reg2'''
         return self._try_all_gadgets(self._find_add_register_to_register_gadgets(reg1, reg2),
-                                        partial(self._try_add_register_to_register, reg1, reg2))
+                                        self._try_add_register_to_register, reg1, reg2)
 
     
     def _try_add_register_to_mem(self, reg, addr_dest, gadget):
@@ -304,7 +316,7 @@ class ChainFinder():
     def add_register_to_mem(self, reg, addr_dest):
         '''*(int64_t*)addr_dest = reg + *(int64_t*)addr_dest'''
         return self._try_all_gadgets(self._find_add_register_to_mem_gadgets(reg),
-                                        partial(self._try_add_register_to_mem, reg, addr_dest))
+                                        self._try_add_register_to_mem, reg, addr_dest)
 
 
     def _try_add_mem_to_register(self, addr_src, reg, gadget):
@@ -345,7 +357,7 @@ class ChainFinder():
     def add_mem_to_register(self, addr_src, reg):
         '''reg = *(int64_t*)addr_src'''
         return self._try_all_gadgets(self._find_add_mem_to_register_gadgets(reg),
-                                        partial(self._try_add_mem_to_register, addr_src, reg))
+                                        self._try_add_mem_to_register, addr_src, reg)
 
 
     def _try_cmp_register_to_register(self, reg1, reg2, gadget):
@@ -400,7 +412,11 @@ class ChainFinder():
         possible_gadgets = set()
 
         for g in self.gadgets:
-            if self._gadget_is_safe(g) and self._gadget_has_no_mem_access(g):
+
+            if not hasattr(g, 'modifies_flags'):
+                raise ValueError('gadget does not have modifies_flags property. Please run analyze_gadgets() first.')
+
+            if self._gadget_is_safe(g) and self._gadget_has_no_mem_access(g) and g.modifies_flags:
                 # Really not proud of this hack, but we need to eliminate more gadgets.
                 # Otherwise, analysis of a medium sized binary takes 17+ hours.
                 # This kind of defeats the point of angr and is architecture dependent.
@@ -417,7 +433,7 @@ class ChainFinder():
     def cmp_reg_to_reg(self, reg1, reg2):
         '''cmp reg1, reg2'''
         return self._try_all_gadgets(self._find_cmp_register_to_register_gadgets(reg1, reg2),
-                                        partial(self._try_cmp_register_to_register, reg1, reg2))
+                                        self._try_cmp_register_to_register, reg1, reg2)
 
 
     def _find_modify_register_gadgets(self, reg):
@@ -449,7 +465,7 @@ class ChainFinder():
     def set_equal(self, reg):
         '''sete reg'''
         return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
-                                        partial(self._try_set_equal, reg))
+                                        self._try_set_equal, reg)
 
     
     def _try_set_less_than(self, reg, gadget):
@@ -472,7 +488,7 @@ class ChainFinder():
     def set_less_than(self, reg):
         '''setl reg'''
         return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
-                                        partial(self._try_set_less_than, reg))
+                                        self._try_set_less_than, reg)
 
 
     def pop_bytes(self, num_bytes):
@@ -501,3 +517,29 @@ class ChainFinder():
                 possible_gadgets.add(chain)
         
         return possible_gadgets
+
+
+    def _check_modifies_flags(self, gadget):
+        '''Detect whether or not the gadget modifies flags and add info to object'''
+
+        def get_initial_constraints(pre_state):
+            return [], []
+
+        def get_final_constraints(pre_state):
+            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+            return [pre_state.regs.rflags == post_state.regs.rflags]
+
+        try:
+            self._get_register_constraints(gadget, get_initial_constraints, get_final_constraints)
+            gadget.modifies_flags = False
+        except:
+            gadget.modifies_flags = True
+
+        return gadget.modifies_flags
+
+
+    def analyze_gadgets(self):
+        '''Add custom analysis to gadget objects for use in finders'''
+
+        for g in self.gadgets:
+            self._check_modifies_flags(g)
