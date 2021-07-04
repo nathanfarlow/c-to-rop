@@ -1,7 +1,7 @@
 
-add: add.asm
-	nasm -felf64 add.asm	
-	ld add.o -o add
+test: test.asm
+	nasm -felf64 test.asm	
+	ld test.o -o test
 
 ../elvm/out/8cc:
 	cd ../elvm
@@ -12,4 +12,4 @@ vic_test.s: vic_test.c ../elvm/out/8cc
 
 clean:
 	rm -f *.o
-	rm add vic_test.s
+	rm -f test vic_test.s
