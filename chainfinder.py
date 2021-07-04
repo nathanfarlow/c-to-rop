@@ -133,7 +133,7 @@ class ChainFinder():
         return chain
 
 
-    def generic_mem_access_get_initial_constraints(self, mem_accesses, action, addr, ignore_registers, pre_state):
+    def _generic_mem_access_get_initial_constraints(self, mem_accesses, action, addr, ignore_registers, pre_state):
             
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
 
@@ -183,7 +183,7 @@ class ChainFinder():
         mem_accesses, action = (gadget.mem_reads, 'read') if is_read else (gadget.mem_writes, 'write')
 
         return self._get_register_constraints(gadget,
-                        partial(self.generic_mem_access_get_initial_constraints, mem_accesses, action, addr, {register}),
+                        partial(self._generic_mem_access_get_initial_constraints, mem_accesses, action, addr, {register}),
                         get_final_constraints)
 
 
@@ -245,14 +245,16 @@ class ChainFinder():
 
             a = pre_state.registers.load(reg1)
             b = pre_state.registers.load(reg2)
-            c = post_state.registers.load(reg2)
+            c = post_state.registers.load(reg1)
 
             return [a + b == c]
 
         return self._get_register_constraints(gadget, get_initial_constraints, get_final_constraints)
 
 
-    def _find_add_register_to_register_gadgets(self, reg1, reg2):
+    def _find_register_dependency_gadgets(self, reg1, reg2):
+        '''reg1 = some operation with reg2'''
+
         possible_gadgets = set()
 
         for g in self.gadgets:
@@ -261,12 +263,12 @@ class ChainFinder():
             if not self._gadget_is_safe(g):
                 continue
 
-            if reg2 not in g.changed_regs or reg2 not in g.reg_dependencies:
+            if reg1 not in g.changed_regs or reg1 not in g.reg_dependencies:
                 continue
 
-            deps = g.reg_dependencies[reg2]
+            deps = g.reg_dependencies[reg1]
 
-            if reg1 not in deps or reg2 not in deps:
+            if reg2 not in deps:
                 continue
         
             possible_gadgets.add(g)
@@ -275,12 +277,12 @@ class ChainFinder():
 
 
     def add_register_to_register(self, reg1, reg2):
-        '''reg2 = reg1 + reg2'''
-        return self._try_all_gadgets(self._find_add_register_to_register_gadgets(reg1, reg2),
+        '''reg1 = reg1 + reg2'''
+        return self._try_all_gadgets(self._find_register_dependency_gadgets(reg1, reg2),
                                         self._try_add_register_to_register, reg1, reg2)
 
     
-    def _try_add_register_to_mem(self, reg, addr_dest, gadget):
+    def _try_add_register_to_mem(self, addr_dest, reg, gadget):
         
         def get_final_constraints(pre_state):
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
@@ -292,7 +294,7 @@ class ChainFinder():
             return [a + b == c]
 
         return self._get_register_constraints(gadget,
-                        partial(self.generic_mem_access_get_initial_constraints, gadget.mem_changes, None, addr_dest, {reg}),
+                        partial(self._generic_mem_access_get_initial_constraints, gadget.mem_changes, None, addr_dest, {reg}),
                         get_final_constraints)
        
 
@@ -313,13 +315,13 @@ class ChainFinder():
         return possible_gadgets
 
 
-    def add_register_to_mem(self, reg, addr_dest):
+    def add_register_to_mem(self, addr_dest, reg):
         '''*(int64_t*)addr_dest = reg + *(int64_t*)addr_dest'''
         return self._try_all_gadgets(self._find_add_register_to_mem_gadgets(reg),
-                                        self._try_add_register_to_mem, reg, addr_dest)
+                                        self._try_add_register_to_mem, addr_dest, reg)
 
 
-    def _try_add_mem_to_register(self, addr_src, reg, gadget):
+    def _try_add_mem_to_register(self, reg, addr_src, gadget):
         
         def get_final_constraints(pre_state):
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
@@ -331,7 +333,7 @@ class ChainFinder():
             return [a + b == c]
 
         return self._get_register_constraints(gadget,
-                        partial(self.generic_mem_access_get_initial_constraints, gadget.mem_reads, None, addr_src, {reg}),
+                        partial(self._generic_mem_access_get_initial_constraints, gadget.mem_reads, None, addr_src, {reg}),
                         get_final_constraints)
      
 
@@ -354,10 +356,32 @@ class ChainFinder():
         return possible_gadgets
 
 
-    def add_mem_to_register(self, addr_src, reg):
+    def add_mem_to_register(self, reg, addr_src):
         '''reg = *(int64_t*)addr_src'''
         return self._try_all_gadgets(self._find_add_mem_to_register_gadgets(reg),
-                                        self._try_add_mem_to_register, addr_src, reg)
+                                        self._try_add_mem_to_register, reg, addr_src)
+
+
+    def _try_mov_register_to_register(self, reg1, reg2, gadget):
+        
+        def get_initial_constraints(pre_state):
+            return [], []
+        
+        def get_final_constraints(pre_state):
+            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+
+            a = pre_state.registers.load(reg2)
+            c = post_state.registers.load(reg1)
+
+            return [a == c]
+
+        return self._get_register_constraints(gadget, get_initial_constraints, get_final_constraints)
+
+
+    def mov_register_to_register(self, reg1, reg2):
+        '''reg1 = reg2'''
+        return self._try_all_gadgets(self._find_register_dependency_gadgets(reg1, reg2),
+                                        self._try_mov_register_to_register, reg1, reg2)
 
 
     def _try_cmp_register_to_register(self, reg1, reg2, gadget):
