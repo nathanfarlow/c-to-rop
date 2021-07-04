@@ -469,6 +469,7 @@ class ChainFinder():
 
         return possible_gadgets
 
+
     def _try_set_equal(self, reg, gadget):
 
         def get_initial_constraints(pre_state):
@@ -509,38 +510,48 @@ class ChainFinder():
 
         return ret
 
+
     def set_less_than(self, reg):
         '''setl reg'''
         return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
                                         self._try_set_less_than, reg)
 
 
+    def _generic_chain_builder(self, pad_stack, gadget):
+        chain = RopChain(self.rop.project, None)
+        chain.add_gadget(gadget)
+        chain.add_value(gadget.addr, needs_rebase=True)
+
+        if pad_stack:
+            bytes_per_pop = self.arch.bytes
+            for _ in range(gadget.stack_change // bytes_per_pop - 1):
+                chain.add_value(self.rop._chain_builder._get_fill_val(), needs_rebase=False)
+
+        return chain
+
+
     def pop_bytes(self, num_bytes):
         '''Find gadgets that increment the stack pointer'''
 
-        possible_gadgets = set()
-
+        possible_gadgets = []
+        
         for g in self.gadgets:
             if self._gadget_is_safe(g) and self._gadget_has_no_mem_access(g) and g.stack_change - self.arch.bytes == num_bytes:
-                chain = RopChain(self.rop.project, None)
-                chain.add_gadget(g)
-                chain.add_value(g.addr, needs_rebase=True)
-                possible_gadgets.add(chain)
+                chain = self._generic_chain_builder(False, g)
+                possible_gadgets.append(ParameterizedGadget(g, chain.payload_len, partial(self._generic_chain_builder, False)))
         
-        return possible_gadgets
+        return sorted(possible_gadgets, key=lambda g: g.expected_payload_len)
 
 
     def syscall(self):
-        possible_gadgets = set()
+        possible_gadgets = []
 
         for g in self.gadgets:
             if not g.bp_moves_to_sp and g.stack_change > 0 and self._gadget_has_no_mem_access(g) and g.makes_syscall:
-                chain = RopChain(self.rop.project, None)
-                chain.add_gadget(g)
-                chain.add_value(g.addr, needs_rebase=True)
-                possible_gadgets.add(chain)
+                chain = self._generic_chain_builder(True, g)
+                possible_gadgets.append(ParameterizedGadget(g, chain.payload_len, partial(self._generic_chain_builder, True)))
         
-        return possible_gadgets
+        return sorted(possible_gadgets, key=lambda g: g.expected_payload_len)
 
 
     def _check_modifies_flags(self, gadget):
