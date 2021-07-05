@@ -167,7 +167,7 @@ class ChainFinder():
             return [initial_constraint], registers_to_solve
     
 
-    @rop_utils.timeout(5)
+    #@rop_utils.timeout(5)
     def _try_access_mem(self, is_read, register, addr, gadget):
 
         def get_final_constraints(pre_state):

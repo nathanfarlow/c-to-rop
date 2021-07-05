@@ -1,6 +1,7 @@
 from angr.project import Project
 from angrop.rop import ROP
-from typing import Dict, List, Tuple
+import multiprocessing
+from typing import Callable, Dict, List, Tuple
 
 from claripy.ast.bool import Bool
 
@@ -15,6 +16,18 @@ from tqdm import tqdm
 class GadgetRepository:
    
     logger = logging.getLogger('c-to-rop')
+
+    gadget_types = [
+        ("mov_register_to_register", True),
+        ("write_register_to_mem", False),
+        ("read_mem_to_register", False),
+        ("add_register_to_register", True),
+        ("add_register_to_mem", False),
+        ("add_mem_to_register", False),
+        ("cmp_reg_to_reg", True),
+        ("set_equal", False),
+        ("set_less_than", False),
+    ]
 
     mov_register_to_register: Dict[Tuple[str, str], List[ParameterizedGadget]]
     write_register_to_mem: Dict[str, List[ParameterizedGadget]]
@@ -64,70 +77,37 @@ class GadgetRepository:
         finder = ChainFinder(self.rop)
         finder.analyze_gadgets()
 
-        self.logger.info('Searching for mov_register_to_register gadgets...')
-        self.mov_register_to_register = {}
-        for pair in tqdm(list(self._all_register_pairs(project))):
-            self.mov_register_to_register[pair] = finder.mov_register_to_register(*pair)
-        self.logger.info(f'Found {self._count_gadgets(*self.mov_register_to_register.values())} gadget(s).')
+        self.logger.info('Searching for %s gadgets...' % ', '.join(gadget_type for gadget_type, _ in GadgetRepository.gadget_types))
+        num_registers = len(project.arch.default_symbolic_registers)
+        num_invocations = sum(num_registers**2 if is_pair else num_registers for _, is_pair in GadgetRepository.gadget_types)
+        progress = tqdm(total=num_invocations)
 
-        self.logger.info('Searching for write_register_to_mem gadgets...')
-        self.write_register_to_mem = {}
-        for register in tqdm(list(self._all_registers(project))):
-            self.write_register_to_mem[register] = finder.write_register_to_mem(register)
-        self.logger.info(f'Found {self._count_gadgets(*self.write_register_to_mem.values())} gadget(s).')
+        pool = multiprocessing.Pool()
+        for gadget_type, is_pair in GadgetRepository.gadget_types:
+            setattr(self, gadget_type, {})
+            finder_method = getattr(finder, gadget_type)
+            for key in self._all_register_pairs(project) if is_pair else self._all_registers(project):
+                def callback(gadget, gadget_type=gadget_type, key=key):
+                    getattr(self, gadget_type)[key] = gadget
+                    progress.update()
+                pool.apply_async(finder_method, key if is_pair else (key,), callback=callback)
+        pool.close()
+        pool.join()
 
-        self.logger.info('Searching for read_mem_to_register gadgets...')
-        self.read_mem_to_register = {}
-        for register in tqdm(list(self._all_registers(project))):
-            self.read_mem_to_register[register] = finder.read_mem_to_register(register)
-        self.logger.info(f'Found {self._count_gadgets(*self.read_mem_to_register.values())} gadget(s).')
-
-        self.logger.info('Searching for add_register_to_register gadgets...')
-        self.add_register_to_register = {}
-        for pair in tqdm(list(self._all_register_pairs(project))):
-            self.add_register_to_register[pair] = finder.add_register_to_register(*pair)
-        self.logger.info(f'Found {self._count_gadgets(*self.add_register_to_register.values())} gadget(s).')
-
-        self.logger.info('Searching for add_register_to_mem gadgets...')
-        self.add_register_to_mem = {}
-        for register in tqdm(list(self._all_registers(project))):
-            self.add_register_to_mem[register] = finder.add_register_to_mem(register)
-        self.logger.info(f'Found {self._count_gadgets(*self.add_register_to_mem.values())} gadget(s).')
-
-        self.logger.info('Searching for add_mem_to_register gadgets...')
-        self.add_mem_to_register = {}
-        for register in tqdm(list(self._all_registers(project))):
-            self.add_mem_to_register[register] = finder.add_mem_to_register(register)
-        self.logger.info(f'Found {self._count_gadgets(*self.add_mem_to_register.values())} gadget(s).')
-
-        self.logger.info('Searching for cmp_reg_to_reg gadgets...')
-        self.cmp_reg_to_reg = {}
-        for pair in tqdm(list(self._all_register_pairs(project))):
-            self.cmp_reg_to_reg[pair] = finder.cmp_reg_to_reg(*pair)
-        self.logger.info(f'Found {self._count_gadgets(*self.cmp_reg_to_reg.values())} gadget(s).')
-
-        self.logger.info('Searching for set_equal gadgets...')
-        self.set_equal = {}
-        for register in tqdm(list(self._all_registers(project))):
-            self.set_equal[register] = finder.set_equal(register)
-        self.logger.info(f'Found {self._count_gadgets(*self.set_equal.values())} gadget(s).')
-
-        self.logger.info('Searching for set_less_than gadgets...')
-        self.set_less_than = {}
-        for register in tqdm(list(self._all_registers(project))):
-            self.set_less_than[register] = finder.set_less_than(register)
-        self.logger.info(f'Found {self._count_gadgets(*self.set_less_than.values())} gadget(s).')
+        progress.close()
+        for gadget_type, is_pair in GadgetRepository.gadget_types:
+            self.logger.info(f'Found {self._count_gadgets(*getattr(self, gadget_type).values())} {gadget_type} gadget(s).')
 
         self.logger.info('Searching for pop_bytes gadgets...')
         self.pop_bytes = {}
         for words in range(32):
             num_bytes = words * project.arch.bytes
             self.pop_bytes[num_bytes] = finder.pop_bytes(num_bytes)
-        self.logger.info(f'Found {self._count_gadgets(*self.pop_bytes.values())} gadget(s).')
+        self.logger.info(f'Found {self._count_gadgets(*self.pop_bytes.values())} pop_bytes gadget(s).')
 
         self.logger.info('Searching for syscall gadgets...')
         self.syscall = finder.syscall()
-        self.logger.info(f'Found {self._count_gadgets(self.syscall)} gadget(s).')
+        self.logger.info(f'Found {self._count_gadgets(self.syscall)} syscall gadget(s).')
 
 
 class RopTarget(Target):
