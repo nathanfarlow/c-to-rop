@@ -28,6 +28,8 @@ class ParameterizedGadget():
 
 class ChainFinder():
 
+    SENTINEL = 0xcafebabedeadbeef
+
     def __init__(self, rop):
         self.rop = rop
         self.gadgets = rop.gadgets
@@ -166,7 +168,7 @@ class ChainFinder():
     
 
     @rop_utils.timeout(5)
-    def _try_access_mem(self, is_read, addr, register, gadget):
+    def _try_access_mem(self, is_read, register, addr, gadget):
 
         def get_final_constraints(pre_state):
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
@@ -224,14 +226,14 @@ class ChainFinder():
 
     def _access_mem(self, is_read, addr, register):
         return self._try_all_gadgets(self._find_mem_access_gadgets(is_read, register),
-                                        self._try_access_mem, is_read, addr, register)
+                                        partial(self._try_access_mem, is_read, register), addr)
 
 
-    def read_mem_to_register(self, addr, register):
+    def read_mem_to_register(self, register, addr=SENTINEL):
         return self._access_mem(True, addr, register)
 
 
-    def write_register_to_mem(self, addr, register):
+    def write_register_to_mem(self, register, addr=SENTINEL):
         return self._access_mem(False, addr, register)
 
 
@@ -279,10 +281,10 @@ class ChainFinder():
     def add_register_to_register(self, reg1, reg2):
         '''reg1 = reg1 + reg2'''
         return self._try_all_gadgets(self._find_register_dependency_gadgets(reg1, reg2),
-                                        self._try_add_register_to_register, reg1, reg2)
+                                        partial(self._try_add_register_to_register, reg1, reg2))
 
     
-    def _try_add_register_to_mem(self, addr_dest, reg, gadget):
+    def _try_add_register_to_mem(self, reg, addr_dest, gadget):
         
         def get_final_constraints(pre_state):
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
@@ -315,10 +317,10 @@ class ChainFinder():
         return possible_gadgets
 
 
-    def add_register_to_mem(self, addr_dest, reg):
+    def add_register_to_mem(self, reg, addr_dest=SENTINEL):
         '''*(int64_t*)addr_dest = reg + *(int64_t*)addr_dest'''
         return self._try_all_gadgets(self._find_add_register_to_mem_gadgets(reg),
-                                        self._try_add_register_to_mem, addr_dest, reg)
+                                        partial(self._try_add_register_to_mem, reg), addr_dest)
 
 
     def _try_add_mem_to_register(self, reg, addr_src, gadget):
@@ -356,10 +358,10 @@ class ChainFinder():
         return possible_gadgets
 
 
-    def add_mem_to_register(self, reg, addr_src):
+    def add_mem_to_register(self, reg, addr_src=SENTINEL):
         '''reg = *(int64_t*)addr_src'''
         return self._try_all_gadgets(self._find_add_mem_to_register_gadgets(reg),
-                                        self._try_add_mem_to_register, reg, addr_src)
+                                        partial(self._try_add_mem_to_register, reg), addr_src)
 
 
     def _try_mov_register_to_register(self, reg1, reg2, gadget):
@@ -381,7 +383,7 @@ class ChainFinder():
     def mov_register_to_register(self, reg1, reg2):
         '''reg1 = reg2'''
         return self._try_all_gadgets(self._find_register_dependency_gadgets(reg1, reg2),
-                                        self._try_mov_register_to_register, reg1, reg2)
+                                        partial(self._try_mov_register_to_register, reg1, reg2))
 
 
     def _try_cmp_register_to_register(self, reg1, reg2, gadget):
@@ -457,7 +459,7 @@ class ChainFinder():
     def cmp_reg_to_reg(self, reg1, reg2):
         '''cmp reg1, reg2'''
         return self._try_all_gadgets(self._find_cmp_register_to_register_gadgets(reg1, reg2),
-                                        self._try_cmp_register_to_register, reg1, reg2)
+                                        partial(self._try_cmp_register_to_register, reg1, reg2))
 
 
     def _find_modify_register_gadgets(self, reg):
@@ -490,7 +492,7 @@ class ChainFinder():
     def set_equal(self, reg):
         '''sete reg'''
         return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
-                                        self._try_set_equal, reg)
+                                        partial(self._try_set_equal, reg))
 
     
     def _try_set_less_than(self, reg, gadget):
@@ -514,7 +516,7 @@ class ChainFinder():
     def set_less_than(self, reg):
         '''setl reg'''
         return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
-                                        self._try_set_less_than, reg)
+                                        partial(self._try_set_less_than, reg))
 
 
     def _generic_chain_builder(self, pad_stack, gadget):

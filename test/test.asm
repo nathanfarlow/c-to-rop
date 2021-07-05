@@ -17,8 +17,14 @@ _start:
     sub rax, rbx
     ret
 
-    ; mov reg, reg gadgets
+    ; mov gadgets
     mov rax, rbx
+    ret
+
+    mov rax, [rbx]
+    ret
+
+    mov [rax], rbx
     ret
 
     ; sete + setl gadgets
