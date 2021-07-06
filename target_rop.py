@@ -26,6 +26,8 @@ class GadgetRepository:
         ("add_mem_to_register", False),
         ("cmp_reg_to_reg", True),
         ("set_equal", False),
+        ("set_signed", False),
+        ("set_carry", False),
         ("set_less_than", False),
     ]
 
@@ -37,6 +39,8 @@ class GadgetRepository:
     add_mem_to_register: Dict[str, List[ParameterizedGadget]]
     cmp_reg_to_reg: Dict[Tuple[str, str], List[ParameterizedGadget]]
     set_equal: Dict[str, List[ParameterizedGadget]]
+    set_signed: Dict[str, List[ParameterizedGadget]]
+    set_carry: Dict[str, List[ParameterizedGadget]]
     set_less_than: Dict[str, List[ParameterizedGadget]]
     pop_bytes: Dict[int, ParameterizedGadget]
     syscall: List[ParameterizedGadget]
@@ -75,7 +79,7 @@ class GadgetRepository:
 
         self.logger.info('Performing initial analysis...')
         finder = ChainFinder(self.rop)
-        finder.analyze_gadgets()
+        finder.analyze_gadgets(show_progress=True)
 
         self.logger.info('Searching for %s gadgets...' % ', '.join(gadget_type for gadget_type, _ in GadgetRepository.gadget_types))
         num_registers = len(project.arch.default_symbolic_registers)

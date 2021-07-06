@@ -8,6 +8,8 @@ import claripy
 
 from functools import partial
 
+from tqdm import tqdm
+
 
 # Some code in this file is directly copied/modified from angrop
 
@@ -472,51 +474,67 @@ class ChainFinder():
         return possible_gadgets
 
 
-    def _try_set_equal(self, reg, gadget):
+    def _build_flag_val(self, ZF, CF, SF, OF):
+        return (ZF << 6) | (CF << 0) | (SF << 7) | (OF << 11)
+
+
+    def _try_generic_set_flag_bit(self, reg, determine_case, example_true_case, gadget):
 
         def get_initial_constraints(pre_state):
-            return [], []
+            if reg not in gadget.reg_dependencies:
+                return [], []
 
-        def check_zero_flag_set(ZF, pre_state):
-            pre_state.registers.store('rflags', ZF << 6)
+            pre_state.registers.store('rflags', example_true_case)
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
             reg_val = post_state.registers.load(reg)[7:0]
-            return [reg_val == ZF]
+            return [reg_val == 1], list(gadget.reg_dependencies[reg])
 
-        for i in range(2):    
-            ret = self._get_register_constraints(gadget, get_initial_constraints, partial(check_zero_flag_set, i))
+        def check_zero_flag(ZF, CF, SF, OF, pre_state):
+            pre_state.registers.store('rflags', self._build_flag_val(ZF, CF, SF, OF))
+            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+            actual_val = post_state.registers.load(reg)[7:0]
+            target_val = 1 if determine_case(ZF, CF, SF, OF) else 0
+            return [actual_val == target_val]
+
+        for OF in (False, True):
+            for CF in (False, True):
+                for SF in (False, True):
+                    for ZF in (False, True):
+                        ret = self._get_register_constraints(gadget, get_initial_constraints, partial(check_zero_flag, ZF, CF, SF, OF))
         
         return ret
 
 
     def set_equal(self, reg):
         '''sete reg'''
+        determine_case = lambda ZF, CF, SF, OF: ZF
+        example_true_case = self._build_flag_val(1, 0, 0, 0)
         return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
-                                        partial(self._try_set_equal, reg))
+                                        partial(self._try_generic_set_flag_bit, reg, determine_case, example_true_case))
 
     
-    def _try_set_less_than(self, reg, gadget):
+    def set_signed(self, reg):
+        '''sets reg'''
+        determine_case = lambda ZF, CF, SF, OF: SF
+        example_true_case = self._build_flag_val(0, 0, 1, 0)
+        return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
+                                        partial(self._try_generic_set_flag_bit, reg, determine_case, example_true_case))
 
-        def get_initial_constraints(pre_state):
-            return [], []
 
-        def check(SF, OF, pre_state):
-            pre_state.registers.store('rflags', (SF << 7) | (OF << 11))
-            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
-            reg_val = post_state.registers.load(reg)[7:0]
-            return [reg_val == SF ^ OF]
-
-        for SF in range(2):
-            for OF in range(2):
-                ret = self._get_register_constraints(gadget, get_initial_constraints, partial(check, SF, OF))
-
-        return ret
+    def set_carry(self, reg):
+        '''setc reg'''
+        determine_case = lambda ZF, CF, SF, OF: CF
+        example_true_case = self._build_flag_val(0, 1, 0, 0)
+        return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
+                                        partial(self._try_generic_set_flag_bit, reg, determine_case, example_true_case))
 
 
     def set_less_than(self, reg):
         '''setl reg'''
+        determine_case = lambda ZF, CF, SF, OF: SF != OF
+        example_true_case = self._build_flag_val(0, 0, 0, 1)
         return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
-                                        partial(self._try_set_less_than, reg))
+                                        partial(self._try_generic_set_flag_bit, reg, determine_case, example_true_case))
 
 
     def _generic_chain_builder(self, pad_stack, gadget):
@@ -556,14 +574,50 @@ class ChainFinder():
         return sorted(possible_gadgets, key=lambda g: g.expected_payload_len)
 
 
-    def _check_modifies_flags(self, gadget):
-        '''Detect whether or not the gadget modifies flags and add info to object'''
+    def _analyze(self, gadget):
+        '''
+        This analysis performs two functions:
+            1. Detect whether or not the gadget modifies flags
+            2. Add registers and dependencies in the case of
+               conditional moves
+        '''
 
         def get_initial_constraints(pre_state):
             return [], []
 
         def get_final_constraints(pre_state):
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+            
+            for a in post_state.history.actions.hardcopy:
+                if a.type == 'reg' and a.action == 'write':
+                    dest_name = a.arch.register_size_names[(a.offset, a.arch.bytes)]
+
+                    if dest_name not in a.arch.default_symbolic_registers:
+                        continue
+                    
+                    gadget.changed_regs.add(dest_name)
+                    if dest_name not in gadget.reg_dependencies:
+                        gadget.reg_dependencies[dest_name] = set()
+                            
+                    def extract_reg_name(symbolic_reg: str):
+                        start, end = 'sreg_', '-_'
+
+                        if start not in symbolic_reg or end not in symbolic_reg:
+                            return None
+
+                        start_pos = symbolic_reg.index(start) + len(start)
+                        end_pos = symbolic_reg.index(end)
+
+                        reg_name = symbolic_reg[start_pos:end_pos]
+
+                        return reg_name if reg_name in a.arch.default_symbolic_registers else None
+
+                    args = filter(lambda x: x != None, map(extract_reg_name, map(str, a.data.ast.args)))
+
+                    for reg_dep in args:
+                        gadget.reg_dependencies[dest_name].add(reg_dep)
+                    
+
             return [pre_state.regs.rflags == post_state.regs.rflags]
 
         try:
@@ -575,8 +629,10 @@ class ChainFinder():
         return gadget.modifies_flags
 
 
-    def analyze_gadgets(self):
-        '''Add custom analysis to gadget objects for use in finders'''
+    def analyze_gadgets(self, show_progress=False):
+        '''Adds custom analysis to gadget objects for use in finders'''
 
-        for g in self.gadgets:
-            self._check_modifies_flags(g)
+        iterable = tqdm(self.gadgets) if show_progress else self.gadgets
+
+        for g in iterable:
+            self._analyze(g)

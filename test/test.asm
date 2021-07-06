@@ -31,7 +31,31 @@ _start:
     sete al
     ret
 
+    cmove rax, rbx
+    ret
+
     setl al
+    ret
+
+    cmovl rax, rbx
+    ret
+
+    sets al
+    ret
+    
+    cmovs rax, rbx
+    ret
+
+    setb al
+    ret
+
+    cmovb rax, rbx
+    ret
+
+    setc al
+    ret
+
+    cmovc rax, rbx
     ret
 
     ; Add reg to mem gadget
