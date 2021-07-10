@@ -70,6 +70,13 @@ _start:
     add rax, rbx
     ret
 
+    ; xor gadgets
+    xor rax, rbx
+    ret
+
+    xor eax, ebx
+    ret
+
     ; Register setting gadgets
     pop rax
     ret

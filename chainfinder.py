@@ -537,6 +537,28 @@ class ChainFinder():
                                         partial(self._try_generic_set_flag_bit, reg, determine_case, example_true_case))
 
 
+    def _try_xor_register_register_gadget(self, reg1, reg2, bits, gadget):
+
+        def get_initial_constraints(pre_state):
+            return [], []
+
+        def get_final_constraints(pre_state):
+            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+
+            a = pre_state.registers.load(reg1)[bits-1:0]
+            b = pre_state.registers.load(reg2)[bits-1:0]
+            c = post_state.registers.load(reg1)[bits-1:0]
+
+            return [c == a ^ b]
+        
+        return self._get_register_constraints(gadget, get_initial_constraints, get_final_constraints)
+
+    def xor_register_register(self, reg1, reg2, bits):
+        '''xor reg1, reg2'''
+        return self._try_all_gadgets(self._find_register_dependency_gadgets(reg1, reg2),
+                                        partial(self._try_xor_register_register_gadget, reg1, reg2, bits))
+
+
     def _generic_chain_builder(self, pad_stack, gadget):
         chain = RopChain(self.rop.project, None)
         chain.add_gadget(gadget)
@@ -612,7 +634,7 @@ class ChainFinder():
 
                         return reg_name if reg_name in a.arch.default_symbolic_registers else None
 
-                    args = filter(lambda x: x != None, map(extract_reg_name, map(str, a.data.ast.args)))
+                    args = filter(bool, map(extract_reg_name, map(str, a.data.ast.args)))
 
                     for reg_dep in args:
                         gadget.reg_dependencies[dest_name].add(reg_dep)

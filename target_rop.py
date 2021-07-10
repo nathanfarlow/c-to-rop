@@ -42,8 +42,9 @@ class GadgetRepository:
     set_signed: Dict[str, List[ParameterizedGadget]]
     set_carry: Dict[str, List[ParameterizedGadget]]
     set_less_than: Dict[str, List[ParameterizedGadget]]
-    pop_bytes: Dict[int, ParameterizedGadget]
+    pop_bytes: Dict[int, List[ParameterizedGadget]]
     syscall: List[ParameterizedGadget]
+    xor_register_register: Dict[int, Dict[Tuple[str, str], List[ParameterizedGadget]]]
 
     rop: ROP
 
@@ -112,6 +113,14 @@ class GadgetRepository:
         self.logger.info('Searching for syscall gadgets...')
         self.syscall = finder.syscall()
         self.logger.info(f'Found {self._count_gadgets(self.syscall)} syscall gadget(s).')
+
+        self.logger.info('Searching for xor_register_register gadgets...')
+        self.xor_register_register = {}
+
+        for bits in (self.rop.project.arch.bits, self.rop.project.arch.bits // 2):
+            self.xor_register_register[bits] = {}
+            for pair in self._all_register_pairs(self.rop.project):
+                self.xor_register_register[bits][pair] = finder.xor_register_register(*pair, bits)
 
 
 class RopTarget(Target):
