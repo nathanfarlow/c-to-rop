@@ -505,36 +505,55 @@ class ChainFinder():
         return ret
 
 
+    def _zero_flag_is_set(self, ZF, CF, SF, OF):
+        '''
+        Due to a limitation in multiprocessing, we can't
+        return any lambda to the original process. So when
+        we return the builder as a partially applied function
+        with this function, it has to be a class function and
+        not a lambda.
+        '''
+        return ZF
+
+
     def set_equal(self, reg):
         '''sete reg'''
-        determine_case = lambda ZF, CF, SF, OF: ZF
         example_true_case = self._build_flag_val(1, 0, 0, 0)
         return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
-                                        partial(self._try_generic_set_flag_bit, reg, determine_case, example_true_case))
+                                        partial(self._try_generic_set_flag_bit, reg, self._zero_flag_is_set, example_true_case))
 
     
+    def _signed_flag_is_set(self, ZF, CF, SF, OF):
+        return SF
+
+
     def set_signed(self, reg):
         '''sets reg'''
-        determine_case = lambda ZF, CF, SF, OF: SF
         example_true_case = self._build_flag_val(0, 0, 1, 0)
         return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
-                                        partial(self._try_generic_set_flag_bit, reg, determine_case, example_true_case))
+                                        partial(self._try_generic_set_flag_bit, reg, self._signed_flag_is_set, example_true_case))
+
+
+    def _carry_flag_is_set(self, ZF, CF, SF, OF):
+        return CF
 
 
     def set_carry(self, reg):
         '''setc reg'''
-        determine_case = lambda ZF, CF, SF, OF: CF
         example_true_case = self._build_flag_val(0, 1, 0, 0)
         return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
-                                        partial(self._try_generic_set_flag_bit, reg, determine_case, example_true_case))
+                                        partial(self._try_generic_set_flag_bit, reg, self._carry_flag_is_set, example_true_case))
+
+
+    def _less_than_is_true(self, ZF, CF, SF, OF):
+        return SF != OF
 
 
     def set_less_than(self, reg):
         '''setl reg'''
-        determine_case = lambda ZF, CF, SF, OF: SF != OF
         example_true_case = self._build_flag_val(0, 0, 0, 1)
         return self._try_all_gadgets(self._find_modify_register_gadgets(reg),
-                                        partial(self._try_generic_set_flag_bit, reg, determine_case, example_true_case))
+                                        partial(self._try_generic_set_flag_bit, reg, self._less_than_is_true, example_true_case))
 
 
     def _try_xor_register_register_gadget(self, reg1, reg2, bits, gadget):
