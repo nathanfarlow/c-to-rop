@@ -3,7 +3,7 @@ import argparse
 
 import angr
 from eir.driver import Driver
-from target_rop import GadgetRepository, RopTarget
+from gadgetrepository import GadgetRepository
 
 import logging
 
