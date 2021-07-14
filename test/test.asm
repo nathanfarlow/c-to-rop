@@ -17,14 +17,25 @@ _start:
     sub rax, rbx
     ret
 
-    ; mov gadgets
+    ; ; mov gadgets
     xchg rax, rbx
+    ret
+
+    ;need set rax -> rbx
+
+    mov rcx, rax
+    ret
+
+    mov rbx, rcx
     ret
 
     mov rax, [rbx]
     ret
 
     mov [rax], rbx
+    ret
+
+    mov [rbx], rax
     ret
 
     ; sete + setl gadgets

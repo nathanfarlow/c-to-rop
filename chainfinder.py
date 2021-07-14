@@ -11,10 +11,10 @@ from angrop.rop_chain import RopChain
 
 class ParameterizedChain:
     
-    def __init__(self, rop: ROP, build: Callable[..., RopChain], gadgets: list[tuple[ParameterizedGadget, str]] = []) -> None:
+    def __init__(self, rop: ROP, gadgets: list[tuple[ParameterizedGadget, str]] = None,  builder: Callable[..., RopChain] = None) -> None:
         self.rop = rop
-        self.build = build
-        self.gadgets = gadgets
+        self.gadgets = gadgets or []
+        self.builder = builder
 
     def _apply_args(self, chain_args: dict[str, tuple]):
 
@@ -37,11 +37,33 @@ class ParameterizedChain:
         '''Compute the expected size this chain will occupy on the stack'''
         return sum(map(lambda pair: pair[0].expected_payload_len, self.gadgets))
 
+    def build(self, *args):
+        if not self.builder:
+            return self._apply_args({})
+        return self.builder(self, *args)
+
 
 class ChainFinder:
 
     def __init__(self, gadgets: GadgetRepository) -> None:
         self.gadgets = gadgets
+
+    def _mov_reg_to_reg(self, dest: str, src: str, avoid=set()) -> Generator[ParameterizedChain]:
+
+        if dest in avoid:
+            return
+
+        if dest == src:
+            yield ParameterizedChain(self.gadgets.rop)
+            return
+
+        registers_that_write_to_dest = filter(lambda to_from: to_from[0] == dest and len(self.gadgets.mov_register_to_register[to_from]) > 0, self.gadgets.mov_register_to_register)
+
+        for _, reg in registers_that_write_to_dest:
+            for init_chain in self._mov_reg_to_reg(reg, src, avoid | {dest}):
+                for mov_to_dest_gadget in self.gadgets.mov_register_to_register[(dest, reg)]:
+                    init_chain.add_gadget((mov_to_dest_gadget, None))
+                    yield init_chain
 
     def find_mov_mem_to_mem(self) -> Generator[ParameterizedChain]:
 
@@ -54,16 +76,10 @@ class ChainFinder:
                 for reg_dest in self.gadgets.write_register_to_mem:
                     for write_reg_to_mem in self.gadgets.write_register_to_mem[reg_dest]:
 
-                        if reg_src == reg_dest:
-                            yield ParameterizedChain(self.gadgets.rop, build, [
-                                (read_mem_to_reg, 'src'),
-                                (write_reg_to_mem, 'dest')
-                            ])
-                        else:
-                            for mov_reg_reg_op in self.gadgets.mov_register_to_register[(reg_dest, reg_src)]:
-                                yield ParameterizedChain(self.gadgets.rop, build, [
-                                    (read_mem_to_reg, 'src'),
-                                    (mov_reg_reg_op, None),
-                                    (write_reg_to_mem, 'dest')
-                                ])
+                        for mov_reg_to_reg in self._mov_reg_to_reg(reg_dest, reg_src):
+                            result = ParameterizedChain(self.gadgets.rop, builder=build)
+                            result.add_gadget((read_mem_to_reg, 'src'))
+                            result.add_all(mov_reg_to_reg.gadgets)
+                            result.add_gadget((write_reg_to_mem, 'dest'))
+                            yield result
 
