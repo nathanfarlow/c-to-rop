@@ -18,7 +18,7 @@ _start:
     ret
 
     ; mov gadgets
-    mov rax, rbx
+    xchg rax, rbx
     ret
 
     mov rax, [rbx]

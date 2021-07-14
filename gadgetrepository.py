@@ -1,7 +1,6 @@
 from angr.project import Project
 from angrop.rop import ROP
 import multiprocessing
-from typing import Dict, List, Tuple
 
 from claripy.ast.bool import Bool
 
@@ -31,20 +30,20 @@ class GadgetRepository:
         ("set_less_than", False),
     ]
 
-    mov_register_to_register: Dict[Tuple[str, str], List[ParameterizedGadget]]
-    write_register_to_mem: Dict[str, List[ParameterizedGadget]]
-    read_mem_to_register: Dict[str, List[ParameterizedGadget]]
-    add_register_to_register: Dict[Tuple[str, str], List[ParameterizedGadget]]
-    add_register_to_mem: Dict[str, List[ParameterizedGadget]]
-    add_mem_to_register: Dict[str, List[ParameterizedGadget]]
-    cmp_reg_to_reg: Dict[Tuple[str, str], List[ParameterizedGadget]]
-    set_equal: Dict[str, List[ParameterizedGadget]]
-    set_signed: Dict[str, List[ParameterizedGadget]]
-    set_carry: Dict[str, List[ParameterizedGadget]]
-    set_less_than: Dict[str, List[ParameterizedGadget]]
-    pop_bytes: Dict[int, List[ParameterizedGadget]]
-    syscall: List[ParameterizedGadget]
-    xor_register_register: Dict[int, Dict[Tuple[str, str], List[ParameterizedGadget]]]
+    mov_register_to_register: dict[tuple[str, str], list[ParameterizedGadget]]
+    write_register_to_mem: dict[str, list[ParameterizedGadget]]
+    read_mem_to_register: dict[str, list[ParameterizedGadget]]
+    add_register_to_register: dict[tuple[str, str], list[ParameterizedGadget]]
+    add_register_to_mem: dict[str, list[ParameterizedGadget]]
+    add_mem_to_register: dict[str, list[ParameterizedGadget]]
+    cmp_reg_to_reg: dict[tuple[str, str], list[ParameterizedGadget]]
+    set_equal: dict[str, list[ParameterizedGadget]]
+    set_signed: dict[str, list[ParameterizedGadget]]
+    set_carry: dict[str, list[ParameterizedGadget]]
+    set_less_than: dict[str, list[ParameterizedGadget]]
+    pop_bytes: dict[int, list[ParameterizedGadget]]
+    syscall: list[ParameterizedGadget]
+    xor_register_register: dict[int, dict[tuple[str, str], list[ParameterizedGadget]]]
 
     rop: ROP
 
@@ -114,7 +113,7 @@ class GadgetRepository:
         self.syscall = finder.syscall()
         self.logger.info(f'Found {self._count_gadgets(self.syscall)} syscall gadget(s).')
 
-        self.logger.info('Searching for xor_register_register gadgets...')
+        self.logger.info('Searching for word and half word xor_register_register gadgets...')
         self.xor_register_register = {}
         for bits in (self.rop.project.arch.bits, self.rop.project.arch.bits // 2):
             self.xor_register_register[bits] = {}
