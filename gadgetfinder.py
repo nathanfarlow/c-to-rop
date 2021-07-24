@@ -16,8 +16,9 @@ from tqdm import tqdm
 
 class ParameterizedGadget():
 
-    def __init__(self, gadget, expected_payload_len, builder):
+    def __init__(self, gadget, changed_registers, expected_payload_len, builder):
         self.gadget = gadget
+        self.changed_registers = changed_registers
         self.expected_payload_len = expected_payload_len
         self.builder = builder
 
@@ -64,6 +65,15 @@ class GadgetFinder():
         return rflags[6] == 1, rflags[0] == 1, rflags[7] == 1, rflags[11] == 1
 
 
+    def _get_changed_registers(self, chain):
+        changed = set()
+
+        for gadget in chain._gadgets:
+            changed |= gadget.changed_regs
+        
+        return changed
+
+
     def _try_all_gadgets(self, gadgets, gadget_runner, *args):
         valid = []
 
@@ -71,7 +81,7 @@ class GadgetFinder():
             try:
                 chain = gadget_runner(*args, g)
                 if chain is not None:
-                    valid.append(ParameterizedGadget(g, chain.payload_len, gadget_runner))
+                    valid.append(ParameterizedGadget(g, self._get_changed_registers(chain), chain.payload_len, gadget_runner))
             except (RopException, angr.errors.SimEngineError):
                 pass
         
@@ -381,8 +391,11 @@ class GadgetFinder():
 
 
     def set_register_value(self, reg, value=SENTINEL):
-        chain = self._try_set_register_value(reg, value)
-        return [ParameterizedGadget(None, chain.payload_len, partial(self._try_set_register_value, reg))]
+        try:
+            chain = self._try_set_register_value(reg, value)
+            return [ParameterizedGadget(None, self._get_changed_registers(chain), chain.payload_len, partial(self._try_set_register_value, reg))]
+        except RopException:
+            return []
 
 
     def _try_mov_register_to_register(self, reg1, reg2, bits, gadget):
@@ -618,7 +631,7 @@ class GadgetFinder():
         for g in self.gadgets:
             if self._gadget_is_safe(g) and self._gadget_has_no_mem_access(g) and g.stack_change - self.arch.bytes == num_bytes:
                 chain = self._generic_chain_builder(False, g)
-                possible_gadgets.append(ParameterizedGadget(g, chain.payload_len, partial(self._generic_chain_builder, False)))
+                possible_gadgets.append(ParameterizedGadget(g, self._get_changed_registers(chain), chain.payload_len, partial(self._generic_chain_builder, False)))
         
         return sorted(possible_gadgets, key=lambda g: g.expected_payload_len)
 
@@ -629,7 +642,7 @@ class GadgetFinder():
         for g in self.gadgets:
             if not g.bp_moves_to_sp and g.stack_change > 0 and self._gadget_has_no_mem_access(g) and g.makes_syscall:
                 chain = self._generic_chain_builder(True, g)
-                possible_gadgets.append(ParameterizedGadget(g, chain.payload_len, partial(self._generic_chain_builder, True)))
+                possible_gadgets.append(ParameterizedGadget(g, self._get_changed_registers(chain), chain.payload_len, partial(self._generic_chain_builder, True)))
         
         return sorted(possible_gadgets, key=lambda g: g.expected_payload_len)
 
