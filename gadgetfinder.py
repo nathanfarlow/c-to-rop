@@ -264,7 +264,7 @@ class GadgetFinder():
         for g in self.gadgets:
             # Skip any mem accesses for now. In the future, we can add
             # support for if we control the mem access
-            if not self._gadget_is_safe(g):
+            if not self._gadget_is_safe(g) or not self._gadget_has_no_mem_access(g):
                 continue
 
             if reg1 not in g.changed_regs or reg1 not in g.reg_dependencies:
@@ -366,7 +366,26 @@ class GadgetFinder():
                                         partial(self._try_add_mem_to_register, reg), addr_src)
 
 
-    def _try_mov_register_to_register(self, reg1, reg2, gadget):
+    def _find_set_register_value_gadgets(self, reg):
+        possible_gadgets = set()
+
+        for g in self.gadgets:
+            if reg in g.popped_regs:
+                possible_gadgets.add(g)
+
+        return possible_gadgets
+
+
+    def _try_set_register_value(self, reg, value, *_):
+        return self.rop.set_regs(use_partial_controllers=False, **{reg: value})
+
+
+    def set_register_value(self, reg, value=SENTINEL):
+        chain = self._try_set_register_value(reg, value)
+        return [ParameterizedGadget(None, chain.payload_len, partial(self._try_set_register_value, reg))]
+
+
+    def _try_mov_register_to_register(self, reg1, reg2, bits, gadget):
         
         def get_initial_constraints(pre_state):
             return [], []
@@ -374,18 +393,18 @@ class GadgetFinder():
         def get_final_constraints(pre_state):
             post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
 
-            a = pre_state.registers.load(reg2)
-            c = post_state.registers.load(reg1)
+            a = pre_state.registers.load(reg2)[bits-1:0]
+            c = post_state.registers.load(reg1)[bits-1:0]
 
             return [a == c]
 
         return self._get_register_constraints(gadget, get_initial_constraints, get_final_constraints)
 
 
-    def mov_register_to_register(self, reg1, reg2):
+    def mov_register_to_register(self, reg1, reg2, bits):
         '''reg1 = reg2'''
         return self._try_all_gadgets(self._find_register_dependency_gadgets(reg1, reg2),
-                                        partial(self._try_mov_register_to_register, reg1, reg2))
+                                        partial(self._try_mov_register_to_register, reg1, reg2, bits))
 
 
     def _try_cmp_register_to_register(self, reg1, reg2, gadget):
@@ -657,6 +676,13 @@ class GadgetFinder():
 
                     for reg_dep in args:
                         gadget.reg_dependencies[dest_name].add(reg_dep)
+
+                    # Very hacky workaround of angrop's setting of rsp to be non symbolic
+                    # This is still just a heuristic though, and if the register doesn't really
+                    # depend on rsp then it will be found out later. We need this so that we
+                    # can find read rsp gadgets.
+                    if 0xffff0008 in a.data.ast.args or 0x7ffffffffff0008 in a.data.ast.args:
+                        gadget.reg_dependencies[dest_name].add(a.arch.register_names[a.arch.sp_offset])
                     
 
             return [pre_state.regs.rflags == post_state.regs.rflags]
