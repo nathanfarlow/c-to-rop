@@ -31,7 +31,7 @@ class ParameterizedGadget():
 
 class GadgetFinder():
 
-    SENTINEL = 0xcafebabedeadbeef
+    SENTINEL = 0xf0894ca21182596e
 
     def __init__(self, rop):
         self.rop = rop
@@ -247,6 +247,53 @@ class GadgetFinder():
 
     def write_register_to_mem(self, register, addr=SENTINEL):
         return self._access_mem(False, addr, register)
+
+
+    def _try_read_mem_ptr_to_register(self, dest, src, gadget):
+
+        def get_initial_constraints(pre_state):
+            return [], []
+        
+        def get_final_constraints(pre_state):
+            pre_state.registers.store(src, self.SENTINEL)
+            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+
+            value_at_memory_in_beginning = pre_state.memory.load(pre_state.registers.load(src), self.arch.bytes, endness=self.arch.memory_endness)
+            register_value_after = post_state.registers.load(dest)
+
+            return [value_at_memory_in_beginning == register_value_after]
+
+        return self._get_register_constraints(gadget, get_initial_constraints, get_final_constraints)
+
+
+    def read_mem_ptr_to_register(self, dest, src):
+        '''dest = *src'''
+        return self._try_all_gadgets(self._find_mem_access_gadgets(True, dest),
+                                        partial(self._try_read_mem_ptr_to_register, dest, src))
+
+
+    def _try_write_register_to_mem_ptr(self, dest, src, gadget):
+
+        def get_initial_constraints(pre_state):
+            return [], []
+        
+        def get_final_constraints(pre_state):
+            pre_state.registers.store(dest, self.SENTINEL)
+
+            post_state = rop_utils.step_to_unconstrained_successor(self.rop.project, pre_state)
+
+            src_val = pre_state.registers.load(src)
+            val_at_dest_at_end = post_state.memory.load(pre_state.registers.load(dest), self.arch.bytes, endness=self.arch.memory_endness)
+
+            return [src_val == val_at_dest_at_end]
+
+        return self._get_register_constraints(gadget, get_initial_constraints, get_final_constraints)
+
+
+    def write_register_to_mem_ptr(self, dest, src):
+        '''*dest = src'''
+        return self._try_all_gadgets(self._find_mem_access_gadgets(False, src),
+                                        partial(self._try_write_register_to_mem_ptr, dest, src))
 
 
     def _try_add_register_to_register(self, reg1, reg2, gadget):

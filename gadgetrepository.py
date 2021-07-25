@@ -19,6 +19,8 @@ class GadgetRepository:
     gadget_types = [
         ("write_register_to_mem", False, False),
         ("read_mem_to_register", False, False),
+        ("read_mem_ptr_to_register", True, False),
+        ('write_register_to_mem_ptr', True, False),
         ("add_register_to_register", True, False),
         ("add_register_to_mem", False, False),
         ("add_mem_to_register", False, False),
@@ -35,6 +37,8 @@ class GadgetRepository:
 
     write_register_to_mem: dict[str, list[ParameterizedGadget]]
     read_mem_to_register: dict[str, list[ParameterizedGadget]]
+    read_mem_ptr_to_register: dict[tuple[str, str], list[ParameterizedGadget]]
+    write_register_to_mem_ptr: dict[tuple[str, str], list[ParameterizedGadget]]
     add_register_to_register: dict[tuple[str, str], list[ParameterizedGadget]]
     add_register_to_mem: dict[str, list[ParameterizedGadget]]
     add_mem_to_register: dict[str, list[ParameterizedGadget]]
@@ -117,7 +121,7 @@ class GadgetRepository:
         pool.join()
 
         progress.close()
-        
+
         for gadget_type, is_pair, supports_half_word in GadgetRepository.gadget_types:
             if supports_half_word:
                 total = 0
