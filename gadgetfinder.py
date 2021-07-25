@@ -763,3 +763,45 @@ class GadgetFinder():
 
         for g in iterable:
             self._analyze(g)
+
+
+    def _build_rsp_gadget(self, gadget):
+        chain = RopChain(self.rop.project, self.rop, rebase=self.rop._rebase, badbytes=self.rop.badbytes)
+        chain.add_value(gadget.addr, True)
+        chain.add_gadget(gadget)
+        return chain
+
+    def mov_register_to_rsp(self, reg):
+
+        try:
+            all_gadgets = []
+
+            for pivot in self.rop.stack_pivots:
+
+                if pivot.sp_popped_offset:
+                    continue
+                
+                if reg in pivot.sp_from_reg:
+                    addr = pivot.addr
+                    this_gadget = RopGadget(addr=addr)
+                    this_gadget.bp_moves_to_sp = False
+                    this_gadget.changed_regs = {'rsp'}
+                    this_gadget.makes_syscall = False
+                    this_gadget.mem_changes = []
+                    this_gadget.mem_writes = []
+                    this_gadget.mem_reads = []
+                    this_gadget.reg_dependencies = {}
+                    this_gadget.reg_dependencies['rsp'] = {reg}
+                    this_gadget.starts_with_syscall = False
+                    this_gadget.stack_change = 0
+                    this_gadget.block_length = 0
+                    this_gadget.addr = pivot.addr
+                    # this_gadget.num_mem_access = 0
+
+                    gadget = ParameterizedGadget(this_gadget, {'rsp'}, self.rop.project.arch.bytes, self._build_rsp_gadget)
+                    all_gadgets.append(gadget)
+
+            return all_gadgets
+
+        except:
+            return []

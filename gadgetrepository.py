@@ -30,6 +30,7 @@ class GadgetRepository:
         ("set_signed", False, False),
         ("set_carry", False, False),
         ("set_less_than", False, False),
+        ('mov_register_to_rsp', False, False),
 
         ("mov_register_to_register", True, True),
         ("xor_register_register", True, True)
@@ -48,6 +49,7 @@ class GadgetRepository:
     set_signed: dict[str, list[ParameterizedGadget]]
     set_carry: dict[str, list[ParameterizedGadget]]
     set_less_than: dict[str, list[ParameterizedGadget]]
+    mov_register_to_rsp: dict[str, list[ParameterizedGadget]]
     pop_bytes: dict[int, list[ParameterizedGadget]]
     syscall: list[ParameterizedGadget]
     mov_register_to_register: dict[int, dict[tuple[str, str]], list[ParameterizedGadget]]

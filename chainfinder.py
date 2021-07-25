@@ -25,6 +25,7 @@ class ParameterizedChain:
 
         for parameterized, args_name in self.gadgets:
             gadget_args = chain_args.get(args_name, ())
+            # print(f'building with {args_name=}, have {gadget_args=}')
             built = parameterized.build(*gadget_args)
             chain += built
 
@@ -734,11 +735,382 @@ class ChainFinder:
         # mov [temp], 0
         # eq_mem_mem [dest], [temp]
 
-        for lt_mem_mem_dest_src in self.lt_mem_mem('lt_'):
-            for mov_temp_0 in self.mov_imm_to_mem('mov_'):
-                for eq_mem_mem_dest_temp in self.eq_mem_mem('eq_'):
+        for lt_mem_mem_dest_src in self.lt_mem_mem(prefix + 'lt_'):
+            for mov_temp_0 in self.mov_imm_to_mem(prefix + 'mov_'):
+                for eq_mem_mem_dest_temp in self.eq_mem_mem(prefix + 'eq_'):
                     result = ParameterizedChain(self.gadgets.rop, builder=build)
                     result.add_all(lt_mem_mem_dest_src.gadgets)
                     result.add_all(mov_temp_0.gadgets)
                     result.add_all(eq_mem_mem_dest_temp.gadgets)
+                    yield result
+
+    def jump_to_imm(self, prefix='') -> Generator[ParameterizedChain]:
+        
+        def build(chain, dest, prefix=prefix):
+            return chain._apply_args({prefix + 'dest': (dest,)})
+
+        # mov rega, jmp
+        # mov regb, rega
+        # mov rsp, regb
+
+        for rega in self.gadgets.set_register_value:
+            for mov_rega_jmp in self.gadgets.set_register_value[rega]:
+
+                for regb in self.gadgets.mov_register_to_rsp:
+                    for mov_regb_rega in self._mov_reg_to_reg(regb, rega, self.gadgets.rop.project.arch.bits):
+
+                        for mov_rsp_regb in self.gadgets.mov_register_to_rsp[regb]:
+                            result = ParameterizedChain(self.gadgets.rop, builder=build)
+                            result.add_gadget((mov_rega_jmp, prefix + 'dest'))
+                            result.add_all(mov_regb_rega.gadgets)
+                            result.add_gadget((mov_rsp_regb, None))
+                            yield result
+
+    def _last_jump_step(self, prefix='') -> Generator[ParameterizedChain]:
+
+        def build(chain, jmp, temp, temp2, prefix=prefix):
+            return chain._apply_args({
+                prefix + 'add1_dest': (temp,),
+                prefix + 'add1_src': (temp,),
+
+                prefix + 'add2_dest': (temp,),
+                prefix + 'add2_src': (temp2,),
+
+                prefix + 'temp': (temp,),
+                prefix + 'temp2': (temp2,),
+                prefix + 'jmp': (jmp,)
+            })
+
+
+
+        # add_mem_mem [temp], [temp]
+        # add_mem_mem [temp], [temp]
+        # add_mem_mem [temp], [temp]
+        # mov rega, rsp
+        # mov regb, rega
+        # mov [temp2], regb
+        # add_mem_mem [temp], [temp2]
+        # mov regc, [temp]
+        # mov regd, regc
+        # mov rsp, regd
+        # pop enough_bytes
+        # mov rege, jmp
+        # mov rsp, rege
+        
+        for add_temp_temp in self.add_mem_to_mem(prefix + 'add1_'):
+            for rega, should_be_rsp in self.gadgets.mov_register_to_register[64]:
+                if should_be_rsp != 'rsp':
+                    continue
+
+                for mov_rega_rsp in self.gadgets.mov_register_to_register[64][(rega, 'rsp')]:
+
+                    for regb in self.gadgets.write_register_to_mem:
+                        
+                        for mov_regb_rega in self._mov_reg_to_reg(regb, rega, 64):
+
+                            for mov_temp2_regb in self.gadgets.write_register_to_mem[regb]:
+
+                                for add_temp_temp2 in self.add_mem_to_mem(prefix + 'add2_'):
+
+                                    for regc in self.gadgets.read_mem_to_register:
+                                        for mov_regc_temp in self.gadgets.read_mem_to_register[regc]:
+
+                                            for regd in self.gadgets.mov_register_to_rsp:
+                                                for mov_regd_regc in self._mov_reg_to_reg(regd, regc, 64):
+
+                                                    for mov_rsp_regd in self.gadgets.mov_register_to_rsp[regd]:
+                                                        
+                                                        for rege in self.gadgets.mov_register_to_rsp:
+                                                            
+                                                            for mov_rege_jmp in self.gadgets.set_register_value[rege]:
+                                                                
+                                                                for mov_rsp_rege in self.gadgets.mov_register_to_rsp[rege]:
+                                                                    
+                                                                    size = mov_rege_jmp.expected_payload_len + mov_rsp_rege.expected_payload_len
+
+                                                                    for pop_bytes in self.gadgets.pop_bytes[size]:
+
+                                                                        result = ParameterizedChain(self.gadgets.rop, builder=build)
+                                                                        result.add_all(add_temp_temp.gadgets)
+                                                                        result.add_all(add_temp_temp.gadgets)
+                                                                        result.add_all(add_temp_temp.gadgets)
+                                                                        result.add_gadget((mov_rega_rsp, None))
+                                                                        result.add_all(mov_regb_rega.gadgets)
+                                                                        result.add_gadget((mov_temp2_regb, prefix + 'temp2'))
+                                                                        result.add_all(add_temp_temp2.gadgets)
+                                                                        result.add_gadget((mov_regc_temp, prefix + 'temp'))
+                                                                        result.add_all(mov_regd_regc.gadgets)
+                                                                        result.add_gadget((mov_rsp_regd, None))
+                                                                        result.add_gadget((pop_bytes, None))
+                                                                        result.add_gadget((mov_rege_jmp, prefix + 'jmp'))
+                                                                        result.add_gadget((mov_rsp_rege, None))
+                                                                        yield result
+
+
+    def je_to_imm(self, prefix='') -> Generator[ParameterizedChain]:
+
+        def build(chain, jmp, dest, src, temp, temp2, prefix=prefix):
+            return chain._apply_args({
+
+                prefix + 'mov_dest': (temp,),
+                prefix + 'mov_src': (dest,),
+
+                prefix + 'eq_dest': (temp,),
+                prefix + 'eq_src': (src,),
+                prefix + 'eq_zero': (0,),
+
+                prefix + 'jmp_add1_dest': (temp,),
+                prefix + 'jmp_add1_src': (temp,),
+
+                prefix + 'jmp_add2_dest': (temp,),
+                prefix + 'jmp_add2_src': (temp2,),
+
+                prefix + 'jmp_temp': (temp,),
+                prefix + 'jmp_temp2': (temp2,),
+                prefix + 'jmp_jmp': (jmp,)
+            })
+
+        # mov [temp], [dest]
+        # eq_mem_mem [temp], [src]
+        # jump step
+        
+        for mov_temp_dest in self.mov_mem_to_mem(prefix + 'mov_'):
+            for eq_mem_mem_temp_src in self.eq_mem_mem(prefix + 'eq_'):
+                for jump_step in self._last_jump_step('jmp_'):
+                    result = ParameterizedChain(self.gadgets.rop, builder=build)
+                    result.add_all(mov_temp_dest.gadgets)
+                    result.add_all(eq_mem_mem_temp_src.gadgets)
+                    result.add_all(jump_step.gadgets)
+                    yield result
+
+    def jne_to_imm(self, prefix='') -> Generator[ParameterizedChain]:
+        
+        def build(chain, jmp, dest, src, temp, temp2, prefix=prefix):
+            return chain._apply_args({
+
+                prefix + 'mov_dest': (temp,),
+                prefix + 'mov_src': (dest,),
+
+                prefix + 'ne_eq1_dest': (temp,),
+                prefix + 'ne_eq1_src': (src,),
+                prefix + 'ne_eq1_zero': (0,),
+
+                prefix + 'ne_mov_dest': (temp2,),
+                prefix + 'ne_mov_src': (0,),
+
+                prefix + 'ne_eq2_dest': (temp,),
+                prefix + 'ne_eq2_src': (temp2,),
+                prefix + 'ne_eq2_zero': (0,),
+
+                prefix + 'jmp_add1_dest': (temp,),
+                prefix + 'jmp_add1_src': (temp,),
+
+                prefix + 'jmp_add2_dest': (temp,),
+                prefix + 'jmp_add2_src': (temp2,),
+
+                prefix + 'jmp_temp': (temp,),
+                prefix + 'jmp_temp2': (temp2,),
+                prefix + 'jmp_jmp': (jmp,)
+            })
+
+        # mov [temp], [dest]
+        # ne_mem_mem [temp], [src]
+        # jump step
+        
+        for mov_temp_dest in self.mov_mem_to_mem(prefix + 'mov_'):
+            for ne_mem_mem_temp_src in self.ne_mem_mem(prefix + 'ne_'):
+                for jump_step in self._last_jump_step('jmp_'):
+                    result = ParameterizedChain(self.gadgets.rop, builder=build)
+                    result.add_all(mov_temp_dest.gadgets)
+                    result.add_all(ne_mem_mem_temp_src.gadgets)
+                    result.add_all(jump_step.gadgets)
+                    yield result
+
+    def jlt_to_imm(self, prefix='') -> Generator[ParameterizedChain]:
+        def build(chain, jmp, dest, src, temp, temp2, prefix=prefix):
+            return chain._apply_args({
+
+                prefix + 'mov_dest': (temp,),
+                prefix + 'mov_src': (dest,),
+
+                prefix + 'lt_dest': (temp,),
+                prefix + 'lt_src': (src,),
+                prefix + 'lt_zero': (0,),
+
+                prefix + 'jmp_add1_dest': (temp,),
+                prefix + 'jmp_add1_src': (temp,),
+
+                prefix + 'jmp_add2_dest': (temp,),
+                prefix + 'jmp_add2_src': (temp2,),
+
+                prefix + 'jmp_temp': (temp,),
+                prefix + 'jmp_temp2': (temp2,),
+                prefix + 'jmp_jmp': (jmp,)
+            })
+
+        # mov [temp], [dest]
+        # lt_mem_mem [temp], [src]
+        # jump step
+        
+        for mov_temp_dest in self.mov_mem_to_mem(prefix + 'mov_'):
+            for lt_mem_mem_temp_src in self.lt_mem_mem(prefix + 'lt_'):
+                for jump_step in self._last_jump_step('jmp_'):
+                    result = ParameterizedChain(self.gadgets.rop, builder=build)
+                    result.add_all(mov_temp_dest.gadgets)
+                    result.add_all(lt_mem_mem_temp_src.gadgets)
+                    result.add_all(jump_step.gadgets)
+                    yield result
+    
+    def jgt_to_imm(self, prefix='') -> Generator[ParameterizedChain]:
+        
+        def build(chain, jmp, dest, src, temp, temp2, prefix=prefix):
+            return chain._apply_args({
+
+                prefix + 'mov_dest': (temp,),
+                prefix + 'mov_src': (dest,),
+
+                prefix + 'gt_mov_dest': (temp,),
+                prefix + 'gt_mov_src': (dest,),
+
+                prefix + 'gt_eq_dest': (temp,),
+                prefix + 'gt_eq_src': (src,),
+                prefix + 'gt_eq_zero': (0,),
+
+                prefix + 'gt_lt_dest': (temp2,),
+                prefix + 'gt_lt_src': (src,),
+                prefix + 'gt_lt_zero': (0,),
+
+                prefix + 'gt_add_dest': (temp,),
+                prefix + 'gt_add_src': (temp2,),
+
+                prefix + 'gt_mov2_dest': (temp2,),
+                prefix + 'gt_mov2_src': (0,),
+
+                prefix + 'gt_eq2_dest': (temp,),
+                prefix + 'gt_eq2_src': (temp2,),
+                prefix + 'gt_eq2_zero': (0,),
+
+                prefix + 'jmp_add1_dest': (temp,),
+                prefix + 'jmp_add1_src': (temp,),
+
+                prefix + 'jmp_add2_dest': (temp,),
+                prefix + 'jmp_add2_src': (temp2,),
+
+                prefix + 'jmp_temp': (temp,),
+                prefix + 'jmp_temp2': (temp2,),
+                prefix + 'jmp_jmp': (jmp,)
+            })
+
+        # mov [temp], [dest]
+        # jgt_mem_mem [temp], [src]
+        # jump step
+        
+        for mov_temp_dest in self.mov_mem_to_mem(prefix + 'mov_'):
+            for gt_mem_mem_temp_src in self.gt_mem_mem(prefix + 'gt_'):
+                for jump_step in self._last_jump_step('jmp_'):
+                    result = ParameterizedChain(self.gadgets.rop, builder=build)
+                    result.add_all(mov_temp_dest.gadgets)
+                    result.add_all(gt_mem_mem_temp_src.gadgets)
+                    result.add_all(jump_step.gadgets)
+                    yield result
+
+    def jle_to_imm(self, prefix='') -> Generator[ParameterizedChain]:
+        def build(chain, jmp, dest, src, temp, temp2, prefix=prefix):
+            return chain._apply_args({
+
+                prefix + 'mov_dest': (temp,),
+                prefix + 'mov_src': (dest,),
+
+                prefix + 'le_mov_dest': (temp2,),
+                prefix + 'le_mov_src': (temp,),
+
+                prefix + 'le_eq_dest': (temp,),
+                prefix + 'le_eq_src': (src,),
+                prefix + 'le_eq_zero': (0,),
+
+                prefix + 'le_lt_dest': (temp2,),
+                prefix + 'le_lt_src': (src,),
+                prefix + 'le_lt_zero': (0,),
+
+                prefix + 'le_add_dest': (temp,),
+                prefix + 'le_add_src': (temp2,),
+
+                prefix + 'le_mov2_dest': (temp2,),
+                prefix + 'le_mov2_src': (0,),
+
+                prefix + 'le_ne_eq1_dest': (temp,),
+                prefix + 'le_ne_eq1_src': (temp2,),
+                prefix + 'le_ne_eq1_zero': (0,),
+
+                prefix + 'le_ne_mov_dest': (temp2,),
+                prefix + 'le_ne_mov_src': (0,),
+
+                prefix + 'le_ne_eq2_dest': (temp,),
+                prefix + 'le_ne_eq2_src': (temp2,),
+                prefix + 'le_ne_eq2_zero': (0,),
+
+                prefix + 'jmp_add1_dest': (temp,),
+                prefix + 'jmp_add1_src': (temp,),
+
+                prefix + 'jmp_add2_dest': (temp,),
+                prefix + 'jmp_add2_src': (temp2,),
+
+                prefix + 'jmp_temp': (temp,),
+                prefix + 'jmp_temp2': (temp2,),
+                prefix + 'jmp_jmp': (jmp,)
+            })
+
+        # mov [temp], [dest]
+        # le_mem_mem [temp], [src]
+        # jump step
+        
+        for mov_temp_dest in self.mov_mem_to_mem(prefix + 'mov_'):
+            for le_mem_mem_temp_src in self.le_mem_mem(prefix + 'le_'):
+                for jump_step in self._last_jump_step('jmp_'):
+                    result = ParameterizedChain(self.gadgets.rop, builder=build)
+                    result.add_all(mov_temp_dest.gadgets)
+                    result.add_all(le_mem_mem_temp_src.gadgets)
+                    result.add_all(jump_step.gadgets)
+                    yield result
+
+    def jge_to_imm(self, prefix='') -> Generator[ParameterizedChain]:
+        def build(chain, jmp, dest, src, temp, temp2, prefix=prefix):
+            return chain._apply_args({
+
+                prefix + 'mov_dest': (temp,),
+                prefix + 'mov_src': (dest,),
+
+                prefix + 'ge_lt_dest': (temp,),
+                prefix + 'ge_lt_src': (src,),
+                prefix + 'ge_lt_zero': (0,),
+
+                prefix + 'ge_mov_dest': (temp2,),
+                prefix + 'ge_mov_src': (0,),
+
+                prefix + 'ge_eq_dest': (temp,),
+                prefix + 'ge_eq_src': (temp2,),
+                prefix + 'ge_eq_zero': (0,),
+
+                prefix + 'jmp_add1_dest': (temp,),
+                prefix + 'jmp_add1_src': (temp,),
+
+                prefix + 'jmp_add2_dest': (temp,),
+                prefix + 'jmp_add2_src': (temp2,),
+
+                prefix + 'jmp_temp': (temp,),
+                prefix + 'jmp_temp2': (temp2,),
+                prefix + 'jmp_jmp': (jmp,)
+            })
+
+        # mov [temp], [dest]
+        # ge_mem_mem [temp], [src]
+        # jump step
+        
+        for mov_temp_dest in self.mov_mem_to_mem(prefix + 'mov_'):
+            for ge_mem_mem_temp_src in self.ge_mem_mem(prefix + 'ge_'):
+                for jump_step in self._last_jump_step('jmp_'):
+                    result = ParameterizedChain(self.gadgets.rop, builder=build)
+                    result.add_all(mov_temp_dest.gadgets)
+                    result.add_all(ge_mem_mem_temp_src.gadgets)
+                    result.add_all(jump_step.gadgets)
                     yield result
