@@ -440,7 +440,7 @@ class GadgetFinder():
     def set_register_value(self, reg, value=SENTINEL):
         try:
             chain = self._try_set_register_value(reg, value)
-            return [ParameterizedGadget(None, self._get_changed_registers(chain), chain.payload_len, partial(self._try_set_register_value, reg))]
+            return [ParameterizedGadget(chain._gadgets[0], self._get_changed_registers(chain), chain.payload_len, partial(self._try_set_register_value, reg))]
         except RopException:
             return []
 
