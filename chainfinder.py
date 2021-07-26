@@ -1114,3 +1114,101 @@ class ChainFinder:
                     result.add_all(ge_mem_mem_temp_src.gadgets)
                     result.add_all(jump_step.gadgets)
                     yield result
+
+    def putchar_mem(self, prefix='') -> Generator[ParameterizedChain]:
+
+        def build(chain, src, prefix=prefix):
+            return chain._apply_args({
+                prefix + 'src': (src,),
+                prefix + 'rax': (1,),
+                prefix + 'rdi': (1,),
+                prefix + 'rdx': (1,)
+            })
+
+        # mov rega, 1
+        # mov rdi, rega
+        # mov regb, [src]
+        # mov rsi, regb
+        # mov regc, 1
+        # mov rdx, regc
+        # mov regd, 1
+        # mov rax, regd
+        # syscall
+
+        for rega in self.gadgets.set_register_value:
+            for mov_rega_val in self.gadgets.set_register_value[rega]:
+
+                for mov_rdi_rega in self._mov_reg_to_reg('rdi', rega, 64):
+
+                    for regb in self.gadgets.read_mem_to_register:
+                        for mov_regb_src in self._preserve_registers(self.gadgets.read_mem_to_register[regb], 'rdi'):
+                            
+                            for mov_rsi_regb in self._mov_reg_to_reg('rsi', regb, 64, {'rdi'}):
+
+                                for regc in self.gadgets.set_register_value:
+                                    for mov_regc_val in self._preserve_registers(self.gadgets.set_register_value[regc], 'rdi', 'rsi'):
+                                        
+                                        for mov_rdx_regc in self._mov_reg_to_reg('rdx', regc, 64, {'rdi', 'rsi'}):
+
+                                            for regd in self.gadgets.set_register_value:
+                                                for mov_regd_val in self._preserve_registers(self.gadgets.set_register_value[regd], 'rdi', 'rsi', 'rdx'):
+                                                    
+                                                    for mov_rax_regd in self._mov_reg_to_reg('rax', regd, 64, {'rdi', 'rsi', 'rdx'}):
+                                                        for syscall in self.gadgets.syscall:
+                                                            if not syscall.gadget.starts_with_syscall:
+                                                                continue
+                                                            
+                                                            result = ParameterizedChain(self.gadgets.rop, builder=build)
+                                                            result.add_gadget((mov_rega_val, prefix + 'rdi'))
+                                                            result.add_all(mov_rdi_rega.gadgets)
+                                                            result.add_gadget((mov_regb_src, prefix + 'src'))
+                                                            result.add_all(mov_rsi_regb.gadgets)
+                                                            result.add_gadget((mov_regc_val, prefix + 'rdx'))
+                                                            result.add_all(mov_rdx_regc.gadgets)
+                                                            result.add_gadget((mov_regd_val, prefix + 'rax'))
+                                                            result.add_all(mov_rax_regd.gadgets)
+                                                            result.add_gadget((syscall, None))
+                                                            yield result
+
+
+    def getchar_mem(self, prefix='') -> Generator[ParameterizedChain]:
+
+        def build(chain, dest, prefix=prefix):
+            return chain._apply_args({
+                prefix + 'zero': (0,),
+                prefix + 'dest': (dest,),
+
+                prefix + 'pc_src': (dest,),
+                prefix + 'pc_rax': (1,),
+                prefix + 'pc_rdi': (1,),
+                prefix + 'pc_rdx': (1,)
+            })
+
+        # mov rega, 0
+        # mov [dest], rega
+        # pc
+
+        for rega in self.gadgets.set_register_value:
+            for mov_rega_0 in self.gadgets.set_register_value[rega]:
+                for mov_src_rega in self.gadgets.write_register_to_mem[rega]:
+                    for pc in self.putchar_mem('pc_'):
+                        result = ParameterizedChain(self.gadgets.rop, builder=build)
+                        result.add_gadget((mov_rega_0, prefix + 'zero'))
+                        result.add_gadget((mov_src_rega, prefix + 'dest'))
+                        result.add_all(pc.gadgets)
+                        yield result
+
+    def exit(self, prefix='') -> Generator[ParameterizedChain]:
+        
+        def build(chain):
+            return chain._apply_args({'rax': (60,)})
+
+        for mov_rax_val in self.gadgets.set_register_value['rax']:
+            for syscall in self.gadgets.syscall:
+                if not syscall.gadget.starts_with_syscall:
+                    continue
+
+                result = ParameterizedChain(self.gadgets.rop, builder=build)
+                result.add_gadget((mov_rax_val, prefix + 'rax'))
+                result.add_gadget((syscall, None))
+                yield result

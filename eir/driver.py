@@ -13,7 +13,6 @@ class Driver:
             compiler.put_store(Register("A"), Immediate(addr))
 
         for inst in self.parser.text_elements:
-            print(inst.original_assembly)
             args = map(self._resolve, inst.args)
             if inst.opcode == "mov":
                 compiler.put_mov(*args)
