@@ -4,8 +4,7 @@ test: test.asm
 	ld test.o -o test
 
 ../elvm/out/8cc:
-	cd ../elvm
-	make out/8cc
+	$(MAKE) -C ../elvm out/8cc
 
 vic_test.s: vic_test.c ../elvm/out/8cc
 	../elvm/out/8cc -S vic_test.c
