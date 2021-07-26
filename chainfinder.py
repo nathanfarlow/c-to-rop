@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Generator
 
-from angrop.rop_utils import gadget_to_asmstring
+from angrop.rop_utils import gadget_to_asmstring, get_ast_controllers
 
 from gadgetfinder import ParameterizedGadget
 from gadgetrepository import GadgetRepository
@@ -470,7 +470,7 @@ class ChainFinder:
 
     def eq_mem_mem(self, prefix='') -> Generator[ParameterizedChain]:
 
-        def build(chain, dest, src, prefix=prefix):
+        def build(chain, dest, src, temp, prefix=prefix):
             return chain._apply_args({prefix + 'dest': (dest,), prefix + 'src': (src,), prefix + 'zero': (0,)})
 
         # mov rega, [src]
@@ -524,11 +524,11 @@ class ChainFinder:
     
     def lt_mem_mem(self, prefix='') -> Generator[ParameterizedChain]:
 
-        def build(chain, dest, src, prefix=prefix):
+        def build(chain, dest, src, temp, prefix=prefix):
             return chain._apply_args({prefix + 'dest': (dest,), prefix + 'src': (src,), prefix + 'zero': (0,)})
 
-        # mov rega, [src]
-        # mov regb, [dest]
+        # mov rega, [dest]
+        # mov regb, [src]
         # mov regc, rega
         # mov regd, regb
         # cmp regc, regd
@@ -565,8 +565,8 @@ class ChainFinder:
                                                             for mov_dest_regf in self.gadgets.write_register_to_mem[regf]:
 
                                                                 result = ParameterizedChain(self.gadgets.rop, builder=build)
-                                                                result.add_gadget((mov_rega_src, prefix + 'src'))
-                                                                result.add_gadget((mov_regb_dest, prefix + 'dest'))
+                                                                result.add_gadget((mov_rega_src, prefix + 'dest'))
+                                                                result.add_gadget((mov_regb_dest, prefix + 'src'))
                                                                 result.add_all(mov_regc_rega.gadgets)
                                                                 result.add_all(mov_regd_regb.gadgets)
                                                                 result.add_gadget((cmp_regc_regd, None))
@@ -746,8 +746,8 @@ class ChainFinder:
 
     def jump_to_imm(self, prefix='') -> Generator[ParameterizedChain]:
         
-        def build(chain, dest, prefix=prefix):
-            return chain._apply_args({prefix + 'dest': (dest,)})
+        def build(chain, jmp, dest, src, temp, temp2, prefix=prefix):
+            return chain._apply_args({prefix + 'jmp': (jmp,)})
 
         # mov rega, jmp
         # mov regb, rega
@@ -761,17 +761,26 @@ class ChainFinder:
 
                         for mov_rsp_regb in self.gadgets.mov_register_to_rsp[regb]:
                             result = ParameterizedChain(self.gadgets.rop, builder=build)
-                            result.add_gadget((mov_rega_jmp, prefix + 'dest'))
+                            result.add_gadget((mov_rega_jmp, prefix + 'jmp'))
                             result.add_all(mov_regb_rega.gadgets)
                             result.add_gadget((mov_rsp_regb, None))
                             yield result
 
+    _ADD_RSP_LEN = 25 * 8
+
     def _last_jump_step(self, prefix='') -> Generator[ParameterizedChain]:
+
 
         def build(chain, jmp, temp, temp2, prefix=prefix):
             return chain._apply_args({
                 prefix + 'add1_dest': (temp,),
                 prefix + 'add1_src': (temp,),
+
+                prefix + 'mov1_src': (self._ADD_RSP_LEN,),
+                prefix + 'mov1_dest': (temp2,),
+
+                prefix + 'add0_dest': (temp,),
+                prefix + 'add0_src': (temp2,),
 
                 prefix + 'add2_dest': (temp,),
                 prefix + 'add2_src': (temp2,),
@@ -781,11 +790,13 @@ class ChainFinder:
                 prefix + 'jmp': (jmp,)
             })
 
+        # add_mem_mem [temp], [temp]
+        # add_mem_mem [temp], [temp]
+        # add_mem_mem [temp], [temp]
 
+        # mov temp2, ADD_RSP_LEN
+        # add temp, temp2
 
-        # add_mem_mem [temp], [temp]
-        # add_mem_mem [temp], [temp]
-        # add_mem_mem [temp], [temp]
         # mov rega, rsp
         # mov regb, rega
         # mov [temp2], regb
@@ -793,58 +804,82 @@ class ChainFinder:
         # mov regc, [temp]
         # mov regd, regc
         # mov rsp, regd
+
+        # ret; ret; ret; to pad to ADD_RSP_LEN bytes
+
         # pop enough_bytes
         # mov rege, jmp
         # mov rsp, rege
         
         for add_temp_temp in self.add_mem_to_mem(prefix + 'add1_'):
-            for rega, should_be_rsp in self.gadgets.mov_register_to_register[64]:
-                if should_be_rsp != 'rsp':
-                    continue
 
-                for mov_rega_rsp in self.gadgets.mov_register_to_register[64][(rega, 'rsp')]:
+            for mov_temp2_add_rsp_len in self.mov_imm_to_mem(prefix + 'mov1_'):
+                for add_temp_temp2 in self.add_mem_to_mem(prefix + 'add0_'):
 
-                    for regb in self.gadgets.write_register_to_mem:
-                        
-                        for mov_regb_rega in self._mov_reg_to_reg(regb, rega, 64):
+                    for rega, should_be_rsp in self.gadgets.mov_register_to_register[64]:
+                        if should_be_rsp != 'rsp':
+                            continue
 
-                            for mov_temp2_regb in self.gadgets.write_register_to_mem[regb]:
+                        for mov_rega_rsp in self.gadgets.mov_register_to_register[64][(rega, 'rsp')]:
 
-                                for add_temp_temp2 in self.add_mem_to_mem(prefix + 'add2_'):
+                            for regb in self.gadgets.write_register_to_mem:
+                                
+                                for mov_regb_rega in self._mov_reg_to_reg(regb, rega, 64):
 
-                                    for regc in self.gadgets.read_mem_to_register:
-                                        for mov_regc_temp in self.gadgets.read_mem_to_register[regc]:
+                                    for mov_temp2_regb in self.gadgets.write_register_to_mem[regb]:
 
-                                            for regd in self.gadgets.mov_register_to_rsp:
-                                                for mov_regd_regc in self._mov_reg_to_reg(regd, regc, 64):
+                                        for add_temp_temp2 in self.add_mem_to_mem(prefix + 'add2_'):
 
-                                                    for mov_rsp_regd in self.gadgets.mov_register_to_rsp[regd]:
-                                                        
-                                                        for rege in self.gadgets.mov_register_to_rsp:
-                                                            
-                                                            for mov_rege_jmp in self.gadgets.set_register_value[rege]:
+                                            for regc in self.gadgets.read_mem_to_register:
+                                                for mov_regc_temp in self.gadgets.read_mem_to_register[regc]:
+
+                                                    for regd in self.gadgets.mov_register_to_rsp:
+                                                        for mov_regd_regc in self._mov_reg_to_reg(regd, regc, 64):
+
+                                                            for mov_rsp_regd in self.gadgets.mov_register_to_rsp[regd]:
                                                                 
-                                                                for mov_rsp_rege in self.gadgets.mov_register_to_rsp[rege]:
-                                                                    
-                                                                    size = mov_rege_jmp.expected_payload_len + mov_rsp_rege.expected_payload_len
+                                                                for nop in self.gadgets.pop_bytes[0]:
+                                                                    for rege in self.gadgets.mov_register_to_rsp:
 
-                                                                    for pop_bytes in self.gadgets.pop_bytes[size]:
+                                                                        for mov_rege_jmp in self.gadgets.set_register_value[rege]:
 
-                                                                        result = ParameterizedChain(self.gadgets.rop, builder=build)
-                                                                        result.add_all(add_temp_temp.gadgets)
-                                                                        result.add_all(add_temp_temp.gadgets)
-                                                                        result.add_all(add_temp_temp.gadgets)
-                                                                        result.add_gadget((mov_rega_rsp, None))
-                                                                        result.add_all(mov_regb_rega.gadgets)
-                                                                        result.add_gadget((mov_temp2_regb, prefix + 'temp2'))
-                                                                        result.add_all(add_temp_temp2.gadgets)
-                                                                        result.add_gadget((mov_regc_temp, prefix + 'temp'))
-                                                                        result.add_all(mov_regd_regc.gadgets)
-                                                                        result.add_gadget((mov_rsp_regd, None))
-                                                                        result.add_gadget((pop_bytes, None))
-                                                                        result.add_gadget((mov_rege_jmp, prefix + 'jmp'))
-                                                                        result.add_gadget((mov_rsp_rege, None))
-                                                                        yield result
+                                                                            for mov_rsp_rege in self.gadgets.mov_register_to_rsp[rege]:
+
+                                                                                size = mov_rege_jmp.expected_payload_len + mov_rsp_rege.expected_payload_len
+
+                                                                                for pop_bytes in self.gadgets.pop_bytes[size]:
+
+                                                                                    result = ParameterizedChain(self.gadgets.rop, builder=build)
+                                                                                    result.add_all(add_temp_temp.gadgets)
+                                                                                    result.add_all(add_temp_temp.gadgets)
+                                                                                    result.add_all(add_temp_temp.gadgets)
+                                                                                    result.add_all(mov_temp2_add_rsp_len.gadgets)
+                                                                                    result.add_all(add_temp_temp2.gadgets)
+                                                                                    result.add_gadget((mov_rega_rsp, None))
+                                                                                    result.add_all(mov_regb_rega.gadgets)
+                                                                                    result.add_gadget((mov_temp2_regb, prefix + 'temp2'))
+                                                                                    result.add_all(add_temp_temp2.gadgets)
+                                                                                    result.add_gadget((mov_regc_temp, prefix + 'temp'))
+                                                                                    result.add_all(mov_regd_regc.gadgets)
+                                                                                    result.add_gadget((mov_rsp_regd, None))
+
+                                                                                    padding_needed = self._ADD_RSP_LEN - sum(g.compute_expected_value() for g in [
+                                                                                        mov_regb_rega,
+                                                                                        add_temp_temp2,
+                                                                                        mov_regd_regc,
+                                                                                    ]) - sum(g.expected_payload_len for g in [
+                                                                                        mov_temp2_regb,
+                                                                                        mov_regc_temp,
+                                                                                        mov_rsp_regd
+                                                                                    ])
+
+                                                                                    for _ in range(padding_needed // 8):
+                                                                                        result.add_gadget((nop, None))
+
+                                                                                    result.add_gadget((pop_bytes, None))
+                                                                                    result.add_gadget((mov_rege_jmp, prefix + 'jmp'))
+                                                                                    result.add_gadget((mov_rsp_rege, None))
+                                                                                    yield result
 
 
     def je_to_imm(self, prefix='') -> Generator[ParameterizedChain]:
@@ -861,6 +896,12 @@ class ChainFinder:
 
                 prefix + 'jmp_add1_dest': (temp,),
                 prefix + 'jmp_add1_src': (temp,),
+                
+                prefix + 'jmp_mov1_src': (self._ADD_RSP_LEN,),
+                prefix + 'jmp_mov1_dest': (temp2,),
+
+                prefix + 'jmp_add0_dest': (temp,),
+                prefix + 'jmp_add0_src': (temp2,),
 
                 prefix + 'jmp_add2_dest': (temp,),
                 prefix + 'jmp_add2_src': (temp2,),
@@ -904,6 +945,12 @@ class ChainFinder:
 
                 prefix + 'jmp_add1_dest': (temp,),
                 prefix + 'jmp_add1_src': (temp,),
+                
+                prefix + 'jmp_mov1_src': (self._ADD_RSP_LEN,),
+                prefix + 'jmp_mov1_dest': (temp2,),
+
+                prefix + 'jmp_add0_dest': (temp,),
+                prefix + 'jmp_add0_src': (temp2,),
 
                 prefix + 'jmp_add2_dest': (temp,),
                 prefix + 'jmp_add2_src': (temp2,),
@@ -939,6 +986,12 @@ class ChainFinder:
 
                 prefix + 'jmp_add1_dest': (temp,),
                 prefix + 'jmp_add1_src': (temp,),
+                
+                prefix + 'jmp_mov1_src': (self._ADD_RSP_LEN,),
+                prefix + 'jmp_mov1_dest': (temp2,),
+
+                prefix + 'jmp_add0_dest': (temp,),
+                prefix + 'jmp_add0_src': (temp2,),
 
                 prefix + 'jmp_add2_dest': (temp,),
                 prefix + 'jmp_add2_src': (temp2,),
@@ -992,6 +1045,12 @@ class ChainFinder:
 
                 prefix + 'jmp_add1_dest': (temp,),
                 prefix + 'jmp_add1_src': (temp,),
+                
+                prefix + 'jmp_mov1_src': (self._ADD_RSP_LEN,),
+                prefix + 'jmp_mov1_dest': (temp2,),
+
+                prefix + 'jmp_add0_dest': (temp,),
+                prefix + 'jmp_add0_src': (temp2,),
 
                 prefix + 'jmp_add2_dest': (temp,),
                 prefix + 'jmp_add2_src': (temp2,),
@@ -1051,6 +1110,12 @@ class ChainFinder:
 
                 prefix + 'jmp_add1_dest': (temp,),
                 prefix + 'jmp_add1_src': (temp,),
+                
+                prefix + 'jmp_mov1_src': (self._ADD_RSP_LEN,),
+                prefix + 'jmp_mov1_dest': (temp2,),
+
+                prefix + 'jmp_add0_dest': (temp,),
+                prefix + 'jmp_add0_src': (temp2,),
 
                 prefix + 'jmp_add2_dest': (temp,),
                 prefix + 'jmp_add2_src': (temp2,),
@@ -1093,6 +1158,12 @@ class ChainFinder:
 
                 prefix + 'jmp_add1_dest': (temp,),
                 prefix + 'jmp_add1_src': (temp,),
+                
+                prefix + 'jmp_mov1_src': (self._ADD_RSP_LEN,),
+                prefix + 'jmp_mov1_dest': (temp2,),
+
+                prefix + 'jmp_add0_dest': (temp,),
+                prefix + 'jmp_add0_src': (temp2,),
 
                 prefix + 'jmp_add2_dest': (temp,),
                 prefix + 'jmp_add2_src': (temp2,),
@@ -1127,7 +1198,7 @@ class ChainFinder:
 
         # mov rega, 1
         # mov rdi, rega
-        # mov regb, [src]
+        # mov regb, src
         # mov rsi, regb
         # mov regc, 1
         # mov rdx, regc
@@ -1140,8 +1211,8 @@ class ChainFinder:
 
                 for mov_rdi_rega in self._mov_reg_to_reg('rdi', rega, 64):
 
-                    for regb in self.gadgets.read_mem_to_register:
-                        for mov_regb_src in self._preserve_registers(self.gadgets.read_mem_to_register[regb], 'rdi'):
+                    for regb in self.gadgets.set_register_value:
+                        for mov_regb_src in self._preserve_registers(self.gadgets.set_register_value[regb], 'rdi'):
                             
                             for mov_rsi_regb in self._mov_reg_to_reg('rsi', regb, 64, {'rdi'}):
 
@@ -1179,7 +1250,7 @@ class ChainFinder:
                 prefix + 'dest': (dest,),
 
                 prefix + 'pc_src': (dest,),
-                prefix + 'pc_rax': (1,),
+                prefix + 'pc_rax': (0,),
                 prefix + 'pc_rdi': (1,),
                 prefix + 'pc_rdx': (1,)
             })
