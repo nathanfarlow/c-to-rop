@@ -74,6 +74,7 @@ class RopTarget(Target):
         self.put_mov(Register('SP'), Immediate(stack_offset))
     
     def fill_jump_targets(self, data_setup_inst_count):
+        data_setup_inst_count = 0
 
         offsets = []
         len_so_far = sum(instruction.compute_size() for instruction in self.instructions[:data_setup_inst_count + 1])
@@ -81,11 +82,15 @@ class RopTarget(Target):
             offsets.append(len_so_far)
             len_so_far += instruction.compute_size()
         
+        l.info('Resolving jump targets...')
+        
         for instruction in self.instructions:
             if instruction.jump_chain is not None:
                 instruction.jump_target = self.rop_address + offsets[instruction.jump_target]
                 instruction.chains[-1] = instruction.jump_chain.build(instruction.jump_target, *instruction.jump_args)
 
+        l.info('Done.')
+        
     def _temp1(self):
         '''temp register for chain finder operations'''
         return self.data_address + 4
@@ -94,9 +99,12 @@ class RopTarget(Target):
         '''temp register for chain finder operations'''
         return self._temp1() + 12
 
-    def _base_address(self):
-        '''start of data for elvm'''
+    def _register_base(self):
+        '''start of registers for elvm'''
         return self._temp2() + 12
+
+    def _data_base(self):
+        return self._register_base() + 7 * 8
 
     def _select(self, chains):
         if len(chains) == 0:
@@ -109,7 +117,7 @@ class RopTarget(Target):
 
     def _resolve_reg(self, reg):
         lookup = ["special", "A", "B", "C", "D", "SP", "BP"]
-        return lookup.index(reg) * 8 + self._base_address()
+        return lookup.index(reg) * 8 + self._register_base()
 
     def put_mov(self, dst: Register, src: Immediate):
         l.info(f'mov {dst}, {src}')
@@ -141,17 +149,27 @@ class RopTarget(Target):
         self.instructions.append(Instruction([built]))
 
     def put_load(self, dst: Register, src: Immediate):
-        print("loadRI")
+        l.info(f'load {dst}, {src}')
+        mov_to_special = self._imm_to_special(src)
+        built = self._select(self.mov_deref_mem_ptr_to_mem).build(self._resolve_reg(dst), self._resolve_reg('special'), self._temp1(), self._data_base())
+        self.instructions.append(mov_to_special + Instruction([built]))
 
     def put_load(self, dst: Register, src: Register):
-        print("loadRR")
+        l.info(f'load {dst}, {src}')
+        built = self._select(self.mov_deref_mem_ptr_to_mem).build(self._resolve_reg(dst), self._resolve_reg(src), self._temp1(), self._data_base())
+        self.instructions.append(Instruction([built]))
 
     def put_store(self, src: Register, dst: Immediate):
-        print("storeRI")
+        l.info(f'store {src}, {dst}')
+        mov_to_special = self._imm_to_special(dst)
+        built = self._select(self.mov_mem_to_deref_mem_ptr).build(self._resolve_reg('special'), self._resolve_reg(src), self._temp1(), self._temp2(), self._data_base())
+        self.instructions.append(mov_to_special + Instruction([built]))
 
     def put_store(self, src: Register, dst: Register):
-        print("storeRR")
-
+        l.info(f'store {src}, {dst}')
+        built = self._select(self.mov_mem_to_deref_mem_ptr).build(self._resolve_reg(dst), self._resolve_reg(src), self._temp1(), self._temp2(), self._data_base())
+        self.instructions.append(Instruction([built]))
+    
     def put_putc(self, src: Immediate):
         l.info(f'putc {src}')
         mov_to_special = self._imm_to_special(src)
@@ -201,6 +219,7 @@ class RopTarget(Target):
         raise NotImplementedError('c-to-rop does not support jumping to register yet')
 
     def put_unconditional_jmp(self, jmp: Immediate):
+        l.info(f'jmp {jmp}')
         args = (None, None, None, None)
         jump_chain = self._select(self.jump_to_imm)
         built = jump_chain.build(int(jmp), *args)

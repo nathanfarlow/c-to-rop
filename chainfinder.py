@@ -224,40 +224,76 @@ class ChainFinder:
     def mov_deref_mem_ptr_to_mem(self, prefix='') -> Generator[ParameterizedChain]:
         '''*dest = **src'''
 
-        def build(chain, dest, src, prefix=prefix):
-            return chain._apply_args({prefix + 'dest': (dest,), prefix + 'src': (src,)})
+        def build(chain, dest, src, temp, base_addr, prefix=prefix):
+            return chain._apply_args({
+                prefix + 'dest': (dest,),
+                prefix + 'src': (src,),
+                
+                prefix + 'mov1_dest': (dest,),
+                prefix + 'mov1_src': (src,),
 
-        # mov rega, [src]
+                prefix + 'add1_dest': (dest,),
+                prefix + 'add1_src': (dest,),
+                prefix + 'add1_zero': (0,),
+
+                prefix + 'mov2_dest': (temp,),
+                prefix + 'mov2_src': (base_addr,),
+
+                prefix + 'add2_dest': (dest,),
+                prefix + 'add2_src': (temp,),
+                prefix + 'add2_zero': (0,),
+            })
+
+        # mov [dest], [src]
+        # add [dest], [dest]
+        # add [dest], [dest]
+        # add [dest], [dest]
+        # mov [temp], base_addr
+        # add [dest], [temp]
+
+        # mov rega, [dest]
         # mov regb, rega
         # mov regc, [regb]
         # mov regd, regc
         # mov [dest], regd
 
-        # mov rega, [src]
-        for rega in self.gadgets.read_mem_to_register:
-            for mov_rega_src in self.gadgets.read_mem_to_register[rega]:
+        for mov_dest_src in self.mov_mem_to_mem(prefix + 'mov1_'):
+            for add_dest_dest in self.add_mem_to_mem(prefix + 'add1_'):
+                for mov_temp_base_addr in self.mov_imm_to_mem(prefix + 'mov2_'):
+                    for add_dest_temp in self.add_mem_to_mem(prefix + 'add2_'):
 
-                # mov regb, rega
-                for regc, regb in self.gadgets.read_mem_ptr_to_register:
-                    for mov_regb_rega in self._mov_reg_to_reg(regb, rega, self.gadgets.rop.project.arch.bits):
+                        # mov rega, [dest]
+                        for rega in self.gadgets.read_mem_to_register:
+                            for mov_rega_dest in self.gadgets.read_mem_to_register[rega]:
 
-                        # mov regc, [regb]
-                        for mov_regc_regb in self.gadgets.read_mem_ptr_to_register[(regc, regb)]:
+                                # mov regb, rega
+                                for regc, regb in self.gadgets.read_mem_ptr_to_register:
+                                    for mov_regb_rega in self._mov_reg_to_reg(regb, rega, self.gadgets.rop.project.arch.bits):
 
-                            # mov regd, regc
-                            for regd in self.gadgets.write_register_to_mem:
-                                for mov_regd_regc in self._mov_reg_to_reg(regd, regc, self.gadgets.rop.project.arch.bits):
+                                        # mov regc, [regb]
+                                        for mov_regc_regb in self.gadgets.read_mem_ptr_to_register[(regc, regb)]:
 
-                                    # mov [dest], regd
-                                    for mov_dest_regd in self.gadgets.write_register_to_mem[regd]:
+                                            # mov regd, regc
+                                            for regd in self.gadgets.write_register_to_mem:
+                                                for mov_regd_regc in self._mov_reg_to_reg(regd, regc, self.gadgets.rop.project.arch.bits):
 
-                                        result = ParameterizedChain(self.gadgets.rop, builder=build)
-                                        result.add_gadget((mov_rega_src, prefix + 'src'))
-                                        result.add_all(mov_regb_rega.gadgets)
-                                        result.add_gadget((mov_regc_regb, None))
-                                        result.add_all(mov_regd_regc.gadgets)
-                                        result.add_gadget((mov_dest_regd, prefix + 'dest'))
-                                        yield result
+                                                    # mov [dest], regd
+                                                    for mov_dest_regd in self.gadgets.write_register_to_mem[regd]:
+
+                                                        result = ParameterizedChain(self.gadgets.rop, builder=build)
+                                                        result.add_all(mov_dest_src.gadgets)
+                                                        result.add_all(add_dest_dest.gadgets)
+                                                        result.add_all(add_dest_dest.gadgets)
+                                                        result.add_all(add_dest_dest.gadgets)
+                                                        result.add_all(mov_temp_base_addr.gadgets)
+                                                        result.add_all(add_dest_temp.gadgets)
+
+                                                        result.add_gadget((mov_rega_dest, prefix + 'dest'))
+                                                        result.add_all(mov_regb_rega.gadgets)
+                                                        result.add_gadget((mov_regc_regb, None))
+                                                        result.add_all(mov_regd_regc.gadgets)
+                                                        result.add_gadget((mov_dest_regd, prefix + 'dest'))
+                                                        yield result
 
 
         # for regb in self.gadgets.read_mem_to_register:
@@ -324,50 +360,78 @@ class ChainFinder:
     def mov_mem_to_deref_mem_ptr(self, prefix='') -> Generator[ParameterizedChain]:
         '''**dest = *src'''
 
-        def build(chain, dest, src, temp, prefix=prefix):
+        def build(chain, dest, src, temp, temp2, base_addr, prefix=prefix):
             return chain._apply_args({
-                prefix + 'mov_deref_mem_ptr_to_mem_dest': (temp,),
-                prefix + 'mov_deref_mem_ptr_to_mem_src': (dest,),
+                prefix + 'mov1_dest': (temp,),
+                prefix + 'mov1_src': (dest,),
+
+                prefix + 'add1_dest': (temp,),
+                prefix + 'add1_src': (temp,),
+                prefix + 'add1_zero': (0,),
+
+                prefix + 'mov2_dest': (temp2,),
+                prefix + 'mov2_src': (base_addr,),
+
+                prefix + 'add2_dest': (temp,),
+                prefix + 'add2_src': (temp2,),
+                prefix + 'add2_zero': (0,),
+
                 prefix + 'src': (src,),
                 prefix + 'temp': (temp,)
             })
 
-        # mov_deref_mem_ptr_to_mem [temp], [dest]
+
+        # mov [temp], [dest]
+        # add [temp], [temp]
+        # add [temp], [temp]
+        # add [temp], [temp]
+        # mov [temp2], base_addr
+        # add [temp], [temp2]
+        
         # mov rega, [temp]
         # mov regb, [src]
         # mov regc, rega
         # mov regd, regb
         # mov [regc], regd
 
-        # mov_deref_mem_ptr_to_mem [temp], [dest]
-        for mov_deref_mem_ptr_to_mem_temp_dest in self.mov_deref_mem_ptr_to_mem(prefix + 'mov_deref_mem_ptr_to_mem_'):
+        for mov_temp_dest in self.mov_mem_to_mem(prefix + 'mov1_'):
+            for add_temp_temp in self.add_mem_to_mem(prefix + 'add1_'):
+                for mov_temp2_base_addr in self.mov_imm_to_mem(prefix + 'mov2_'):
+                    for add_temp_temp2 in self.add_mem_to_mem(prefix + 'add2_'):
 
-            # mov rega, [temp]
-            for rega in self.gadgets.read_mem_to_register:
-                for mov_rega_temp in self.gadgets.read_mem_to_register[rega]:
+                        # mov rega, [temp]
+                        for rega in self.gadgets.read_mem_to_register:
+                            for mov_rega_temp in self.gadgets.read_mem_to_register[rega]:
 
-                    # mov regb, [src]
-                    for regb in self.gadgets.read_mem_to_register:
-                        for mov_regb_src in self._preserve_registers(self.gadgets.read_mem_to_register[regb], rega):
+                                # mov regb, [src]
+                                for regb in self.gadgets.read_mem_to_register:
+                                    for mov_regb_src in self._preserve_registers(self.gadgets.read_mem_to_register[regb], rega):
 
-                            # mov regc, rega
-                            for regc, regd in self.gadgets.write_register_to_mem_ptr:
-                                for mov_regc_rega in self._mov_reg_to_reg(regc, rega, self.gadgets.rop.project.arch.bits, {regb}):
+                                        # mov regc, rega
+                                        for regc, regd in self.gadgets.write_register_to_mem_ptr:
+                                            for mov_regc_rega in self._mov_reg_to_reg(regc, rega, self.gadgets.rop.project.arch.bits, {regb}):
 
-                                    # mov regd, regb
-                                    for mov_regd_regb in self._mov_reg_to_reg(regd, regb, self.gadgets.rop.project.arch.bits, {regc}):
+                                                # mov regd, regb
+                                                for mov_regd_regb in self._mov_reg_to_reg(regd, regb, self.gadgets.rop.project.arch.bits, {regc}):
 
-                                        # mov [regc], regd
-                                        for mov_regc_regd in self.gadgets.write_register_to_mem_ptr[(regc, regd)]:
+                                                    # mov [regc], regd
+                                                    for mov_regc_regd in self.gadgets.write_register_to_mem_ptr[(regc, regd)]:
 
-                                            result = ParameterizedChain(self.gadgets.rop, builder=build)
-                                            result.add_all(mov_deref_mem_ptr_to_mem_temp_dest.gadgets)
-                                            result.add_gadget((mov_rega_temp, prefix + 'temp'))
-                                            result.add_gadget((mov_regb_src, prefix + 'src'))
-                                            result.add_all(mov_regc_rega.gadgets)
-                                            result.add_all(mov_regd_regb.gadgets)
-                                            result.add_gadget((mov_regc_regd, None))
-                                            yield result
+                                                        result = ParameterizedChain(self.gadgets.rop, builder=build)
+
+                                                        result.add_all(mov_temp_dest.gadgets)
+                                                        result.add_all(add_temp_temp.gadgets)
+                                                        result.add_all(add_temp_temp.gadgets)
+                                                        result.add_all(add_temp_temp.gadgets)
+                                                        result.add_all(mov_temp2_base_addr.gadgets)
+                                                        result.add_all(add_temp_temp2.gadgets)
+
+                                                        result.add_gadget((mov_rega_temp, prefix + 'temp'))
+                                                        result.add_gadget((mov_regb_src, prefix + 'src'))
+                                                        result.add_all(mov_regc_rega.gadgets)
+                                                        result.add_all(mov_regd_regb.gadgets)
+                                                        result.add_gadget((mov_regc_regd, None))
+                                                        yield result
 
     def _sub_xor_step(self, prefix='') -> Generator[ParameterizedChain]:
 
