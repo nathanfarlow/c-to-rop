@@ -1,4 +1,6 @@
+#define assert(...)
 #define rop_puts(s) {const char*cpp_temp=(s);while (*cpp_temp) putchar(*(cpp_temp++));}
+#define rop_divmod(a, b, c) {int result = 0; int i = a; while (i >= b) {i -= b; result++;} c = i; a = result;}
 #define rop_putint(xx) {\
     int x = (xx); \
     if (x == 0) { \
@@ -7,8 +9,9 @@
         char s[4] = "\0\0\0\0"; \
         char *i = s; \
         while (0 < x) { \
-            *i = '0' + x % 10; \
-            x = x / 10; \
+            int rem; \
+            rop_divmod(x, 10, rem); \
+            *i = '0' + rem; \
             i++; \
         } \
         do { \
@@ -17,28 +20,36 @@
         } while (i != s); \
     } \
 }
-#define rop_setpos(r, c) \
+#define rop_setpos(r, c) {\
     putchar('\e'); \
     putchar('['); \
-    rop_putint(((r) + 1) * 5); \
+    int cpp_temp = (r) + 1; \
+    cpp_temp = cpp_temp + cpp_temp + cpp_temp + cpp_temp + cpp_temp; \
+    rop_putint(cpp_temp); \
     putchar(';'); \
-    rop_putint(((c) + 1) * 10); \
-    putchar('H');
-
-const char line_01[]  = "\e[2C~~~~~~~";
-const char line_10[]  = "\e[B~\e[B\e[D~\e[B\e[D~\e[B\e[D~";
-const char line_11[]  = "\e[B\e[C\e[C~\e[C\e[B~\e[C\e[B~\e[C\e[B~";
-const char line_11$[] = "\e[A\e[C\e[C~\e[C\e[A~\e[C\e[A~\e[C\e[A~";
-const char line_21[]  = "\e[B\e[C~\e[B~\e[B~\e[B~\e[B~\e[B~\e[B~\e[B~\e[B~";
-const char line_21$[] = "\e[A\e[C~\e[A~\e[A~\e[A~\e[A~\e[A~\e[A~\e[A~\e[A~";
-const char line_12[]  = "\e[B\e[C~~~~~\e[B~~~~~\e[B\e[D~~~~~\e[B~~~~~";
-const char line_12$[] = "\e[A\e[C~~~~~\e[A~~~~~\e[A\e[D~~~~~\e[A~~~~~";
-
-char *greeting = "Draw pattern to get flag";
-int row_last = -1;
-int col_last = -1;
+    cpp_temp = (c) + 1; \
+    cpp_temp += cpp_temp; \
+    cpp_temp = cpp_temp + cpp_temp + cpp_temp + cpp_temp + cpp_temp; \
+    rop_putint(cpp_temp); \
+    putchar('H'); \
+}
 
 void rop() {
+    const char line_01[]  = "\e[2C~~~~~~~";
+    const char line_10[]  = "\e[B~\e[B\e[D~\e[B\e[D~\e[B\e[D~";
+    const char line_11[]  = "\e[B\e[C\e[C~\e[C\e[B~\e[C\e[B~\e[C\e[B~";
+    const char line_11$[] = "\e[A\e[C\e[C~\e[C\e[A~\e[C\e[A~\e[C\e[A~";
+    const char line_21[]  = "\e[B\e[C~\e[B~\e[B~\e[B~\e[B~\e[B~\e[B~\e[B~\e[B~";
+    const char line_21$[] = "\e[A\e[C~\e[A~\e[A~\e[A~\e[A~\e[A~\e[A~\e[A~\e[A~";
+    const char line_12[]  = "\e[B\e[C~~~~~\e[B~~~~~\e[B\e[D~~~~~\e[B~~~~~";
+    const char line_12$[] = "\e[A\e[C~~~~~\e[A~~~~~\e[A\e[D~~~~~\e[A~~~~~";
+
+    char *greeting = "Draw pattern to get flag";
+    int row_last = -1;
+    int col_last = -1;
+    unsigned char entries[10];
+    int num_entries;
+
     rop_puts("\e[?1002h"); // mouse mode
     rop_puts("\e[?25l"); // hide cursor
     clear:
@@ -52,6 +63,7 @@ void rop() {
         }
     }
 
+    num_entries = 0;
     int num_read = 0;
     char motion;
     int row, col;
@@ -106,9 +118,12 @@ void rop() {
                 }
                 if (row_small != -1 && col_small != -1) {
                     if (row_last != -1) {
-                    /******************************
-                    * draw_line                   *
-                    ******************************/
+                        if (num_entries != sizeof(entries)) {
+                            entries[num_entries] = row_small + row_small + row_small + col_small;
+                            num_entries++;
+                            /******************************
+                            * draw_line                   *
+                            ******************************/
 int r1 = row_last;
 int c1 = col_last;
 int r2 = row_small;
@@ -183,9 +198,10 @@ if (c1 == c2) {
             assert(0);
     }
 }
-                        /******************************
-                        * draw_line (end)             *
-                        ******************************/
+                            /******************************
+                            * draw_line (end)             *
+                            ******************************/
+                        } // if (num_entries < sizeof(entries))
                     }
                     row_last = row_small;
                     col_last = col_small;
@@ -196,6 +212,11 @@ if (c1 == c2) {
                 /******************************
                 * validate                    *
                 ******************************/
+                rop_puts("\e[HValidating");
+                for (int i = 0; i < num_entries; i++) {
+                    fprintf(stderr, "%d ", entries[i]);
+                }
+                fprintf(stderr, "\n");
                 greeting = "Sorry, try again!";
                 goto clear;
             }
