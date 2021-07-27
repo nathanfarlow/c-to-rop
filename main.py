@@ -1,23 +1,46 @@
 
 import argparse
+import os
+from chainfinder import ChainFinder
 
 import angr
 from eir.driver import Driver
+from target_rop import RopTarget
 from gadgetrepository import GadgetRepository
 
 import logging
+
+import sys
+
 
 if __name__ == '__main__':
 
     logging.getLogger('angr').setLevel(logging.ERROR)
     logging.getLogger('c-to-rop').setLevel(logging.INFO)
 
-    project = angr.Project('test/test')
-    r = GadgetRepository()
+    _, bin_name, saved_name, elvm_ir, data_base, rop_base, output_file = sys.argv
 
-    r.load_from_project(project)
-    r.save_to_file('test.bin')
-    r.load_from_file('test.bin')
-    for i in ["mov_register_to_register", "write_register_to_mem", "read_mem_to_register", "add_register_to_register", "add_register_to_mem", "add_mem_to_register", "cmp_reg_to_reg", "set_equal", "set_less_than", "pop_bytes"]:
-        print(i, r._count_gadgets(*getattr(r, i).values()))
-    print("syscall", r._count_gadgets(r.syscall))
+    data_base = int(data_base, 16)
+    rop_base = int(rop_base, 16)
+
+    gadget_repo = GadgetRepository()
+
+    # bin_name = '/lib/x86_64-linux-gnu/libc-2.31.so'
+    # saved_name = 'savedlibc.bin'
+
+    if not os.path.exists(saved_name):
+        project = angr.Project(bin_name)
+        gadget_repo.load_from_project(project)
+        gadget_repo.save_to_file(saved_name)
+    else:
+        gadget_repo.load_from_file(saved_name)
+
+    finder = ChainFinder(gadget_repo)
+
+    target = RopTarget(finder, data_base, rop_base)
+    driver = Driver(elvm_ir, target)
+    target.fill_jump_targets(driver.data_setup_inst_count)
+
+    with open(output_file, 'w') as f:
+        payload = target.build()
+        f.write(payload)

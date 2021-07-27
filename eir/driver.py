@@ -37,7 +37,7 @@ class Driver:
                 compiler.put_unconditional_jmp(*self._offset_jump_target(args))
             elif inst.opcode in ("eq", "ne", "lt", "gt", "le", "ge"):
                 cc = ConditionCode[inst.opcode.upper()]
-                compiler.put_cmp(*self._offset_jump_target(args), cc)
+                compiler.put_cmp(*args, cc)
 
     def _resolve(self, arg):
         # maybe it's an integer?
