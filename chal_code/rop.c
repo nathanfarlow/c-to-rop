@@ -50,6 +50,16 @@ void rop() {
     unsigned char entries[10];
     int num_entries;
 
+    int sudoku_orig[] = {7,6,2,3,8,5,1,4,0,
+                         8,4,9,1,2,6,0,5,3,
+                         1,5,3,4,7,9,8,2,6,
+                         6,7,1,0,9,2,4,3,5,
+                         9,3,4,5,1,7,0,6,8,
+                         5,2,8,6,0,3,9,1,7,
+                         4,8,6,7,3,1,0,9,2,
+                         3,9,7,2,5,4,6,8,1,
+                         2,1,5,9,6,8,3,7,4};
+
     rop_puts("\e[?1002h"); // mouse mode
     rop_puts("\e[?25l"); // hide cursor
     clear:
@@ -116,11 +126,11 @@ void rop() {
                     case 20: col_small = 1; break;
                     case 30: col_small = 2; break;
                 }
-                if (row_small != -1 && col_small != -1) {
-                    if (row_last != -1) {
-                        if (num_entries != sizeof(entries)) {
-                            entries[num_entries] = row_small + row_small + row_small + col_small;
-                            num_entries++;
+                if (row_small != -1 && col_small != -1 && (row_small != row_last || col_small != col_last)) {
+                    if (num_entries != sizeof(entries)) {
+                        entries[num_entries] = row_small + row_small + row_small + col_small;
+                        num_entries++;
+                        if (row_last != -1) {
                             /******************************
                             * draw_line                   *
                             ******************************/
@@ -201,22 +211,81 @@ if (c1 == c2) {
                             /******************************
                             * draw_line (end)             *
                             ******************************/
-                        } // if (num_entries < sizeof(entries))
-                    }
+                        }
+                    } // if (num_entries < sizeof(entries))
                     row_last = row_small;
                     col_last = col_small;
-                }
+                } // if motionevent on point
             } else if (motion == '#') { // release
                 row_last = -1;
                 col_last = -1;
                 /******************************
                 * validate                    *
                 ******************************/
-                rop_puts("\e[HValidating");
-                for (int i = 0; i < num_entries; i++) {
-                    fprintf(stderr, "%d ", entries[i]);
+                int sudoku[81];
+                unsigned char *entry_ptr = entries;
+                for (int i = 0; i < 81; i++) {
+                    int number = sudoku_orig[i];
+                    if (number) {
+                        sudoku[i] = number - 1;
+                    } else {
+                        sudoku[i] = *entry_ptr;
+                        entry_ptr++;
+                    }
                 }
-                fprintf(stderr, "\n");
+                int seen[9];
+                // rows
+                for (int i = 0; i < 81; i += 9) {
+                    for (int j = 0; j < 9; j++) {
+                        seen[j] = 0;
+                    }
+                    for (int j = 0; j < 9; j++) {
+                        int *num_seen = seen + (sudoku[i + j]);
+                        if (*num_seen) {
+                            //dprintf(2, "fail 239, %d %d %d\n", i, j, sudoku[i + j]);
+                            goto fail;
+                        }
+                        *num_seen = 1;
+                    }
+                }
+                // cols
+                for (int i = 0; i < 9; i++) {
+                    for (int j = 0; j < 9; j++) {
+                        seen[j] = 0;
+                    }
+                    for (int j = 0; j < 81; j += 9) {
+                        int *num_seen = seen + (sudoku[i + j]);
+                        if (*num_seen) {
+                            //dprintf(2, "fail 253, %d %d\n", i, j);
+                            goto fail;
+                        }
+                        *num_seen = 1;
+                    }
+                }
+                // boxes
+                for (int ii = 0; ii < 81; ii += 27) { // box r
+                    for (int jj = 0; jj < 9; jj += 3) { // box c
+                        for (int j = 0; j < 9; j++) {
+                            seen[j] = 0;
+                        }
+                        for (int i = 0; i < 27; i += 9) { // r within box
+                            for (int j = 0; j < 3; j++) { // c within box
+                                int *num_seen = seen + (sudoku[ii + jj + i + j]);
+                                if (*num_seen) {
+                                    //dprintf(2, "fail 269, %d %d %d %d", ii, jj, i, j);
+                                    goto fail;
+                                }
+                                *num_seen = 1;
+                            }
+                        }
+                    }
+                }
+                /******************************
+                * win                         *
+                ******************************/
+                greeting = "uiuctf{fake_flag}";
+                goto clear;
+                fail:
                 greeting = "Sorry, try again!";
                 goto clear;
             }
