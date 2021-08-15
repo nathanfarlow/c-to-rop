@@ -1,9 +1,24 @@
 
 global _start
 
+
+section .data
+
+data_segment: resb 1024 * 1024
+
+stack_segment: resb 1024 * 1024 * 3
+
+
 section .text
 
 _start:
+
+    lea rsp, [stack_segment]
+    ret
+
+    ; stack pivot gadgets
+    mov rsp, rax
+    ret
 
     ; syscall gadget
     mov rax, 60
@@ -14,6 +29,12 @@ _start:
     cmp rax, rbx
     ret
 
+    cmp rcx, rbx
+    ret
+
+    xor rax, rax
+    ret
+
     sub rax, rbx
     ret
 
@@ -21,7 +42,33 @@ _start:
     xchg rax, rbx
     ret
 
+    xchg rax, rcx
+    ret
+
+    xchg rbx, rcx
+    ret
+
+    mov rax, rsp
+    ret
+
+    pop rax
+    pop rax
+    pop rax
+    pop rax
+    pop rax
+    pop rax
+    pop rax
+    pop rax
+    pop rax
+    pop rax
+    pop rax
+    pop rax
+    ret
+
     ;need set rax -> rbx
+
+    xchg rax, rsi
+    ret
 
     mov rcx, rax
     ret
@@ -30,6 +77,15 @@ _start:
     ret
 
     mov rax, [rbx]
+    ret
+
+    mov rbx, [rax]
+    ret
+
+    mov rcx, [rax]
+    ret
+
+    mov [rax], rcx
     ret
 
     mov [rax], rbx
@@ -134,5 +190,9 @@ _start:
     pop r14
     ret
 
+    pop r15
+    ret
+
+    ; for some reason angrop doesn't pick up this gadget?
     pop r15
     ret

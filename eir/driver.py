@@ -42,7 +42,13 @@ class Driver:
     def _resolve(self, arg):
         # maybe it's an integer?
         try:
-            return Immediate(arg)
+            int_val = int(arg)
+
+            if int_val > 0:
+                as_bytes = int_val.to_bytes(3, 'big')
+                int_val = int.from_bytes(as_bytes, 'big', signed=True)
+            
+            return Immediate(int_val)
         except ValueError:
             pass
         # maybe it's a register

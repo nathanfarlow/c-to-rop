@@ -4,11 +4,17 @@ from angrop.rop_chain import RopChain
 from chainfinder import ChainFinder, ParameterizedChain
 from eir.target import Target, ConditionCode, Immediate, Register
 
+from tqdm import tqdm
+
+import random
+
 l = logging.getLogger('c-to-rop')
 
 class Instruction:
 
-    def __init__(self, chains: list[RopChain], jump_chain: ParameterizedChain = None, jump_target: int = None, jump_args = None) -> None:
+    comment: str
+
+    def __init__(self, chains: list[list[RopChain]], jump_chain: ParameterizedChain = None, jump_target: int = None, jump_args = None) -> None:
         self.chains = chains
         self.jump_chain = jump_chain
         self.jump_target = jump_target
@@ -22,12 +28,19 @@ class Instruction:
 
     def build_string(self):
         result = ''
+        # print(self.chains)
         for chain in self.chains:
-            result += str(chain)
+            for fuck in chain:
+                result += fuck[1]
         return result
 
     def compute_size(self):
-        return sum(chain.payload_len for chain in self.chains)
+        s = 0
+
+        for chain_arr in self.chains:
+            s += sum(chain[0] for chain in chain_arr)
+        
+        return s
 
 class RopTarget(Target):
 
@@ -58,7 +71,17 @@ class RopTarget(Target):
     getchar_mem: list[ParameterizedChain]
     exit: list[ParameterizedChain]
 
-    def __init__(self, finder: ChainFinder, data_address: int, rop_address: int, stack_offset=1000) -> None:
+    def _take_first(self, generator, N):
+        ret = []
+        for _ in range(N):
+            try:
+                ret.append(next(generator))
+            except:
+                break
+            
+        return ret
+
+    def __init__(self, finder: ChainFinder, data_address: int, rop_address: int, stack_offset=2048) -> None:
         self.finder = finder
         self.data_address = data_address
         self.rop_address = rop_address
@@ -68,7 +91,13 @@ class RopTarget(Target):
             if name.startswith('_') or name == 'gadgets':
                 continue
 
-            result = [next(getattr(finder, name)())]
+            # if name in ('eq_mem_mem', 'lt_mem_mem', 'ne_mem_mem', 'gt_mem_mem', 'le_mem_mem', 'ge_mem_mem', 'je_to_imm'):
+            #     N = 1
+            # else:
+            N = 1
+            
+            result = self._take_first(getattr(finder, name)(), N)
+            l.info(f'Using {len(result)} unique chains for {name}')
             setattr(self, name, result)
 
         self.put_mov(Register('SP'), Immediate(stack_offset))
@@ -110,7 +139,7 @@ class RopTarget(Target):
         if len(chains) == 0:
             l.error('No chains available for instruction.')
             raise ValueError('No chains available for instruction.')
-        return chains[0]
+        return random.choice(chains)
 
     def _imm_to_special(self, imm: Immediate):
         return Instruction([self._select(self.mov_imm_to_mem).build(self._resolve_reg('special'), int(imm))])
@@ -122,23 +151,35 @@ class RopTarget(Target):
     def put_mov(self, dst: Register, src: Immediate):
         l.info(f'mov {dst}, {src}')
         built = self._select(self.mov_imm_to_mem).build(self._resolve_reg(dst), int(src))
-        self.instructions.append(Instruction([built]))
+
+        ret = Instruction([built])
+        ret.comment = f'mov {dst}, {src}'
+        self.instructions.append(ret)
 
     def put_mov(self, dst: Register, src: Register):
         l.info(f'mov {dst}, {src}')
         built = self._select(self.mov_mem_to_mem).build(self._resolve_reg(dst), self._resolve_reg(src))
-        self.instructions.append(Instruction([built]))
+
+        ret = Instruction([built])
+        ret.comment = f'mov {dst}, {src}'
+        self.instructions.append(ret)
 
     def put_add(self, dst: Register, src: Immediate):
         l.info(f'add {dst}, {src}')
         mov_to_special = self._imm_to_special(src)
         built = self._select(self.add_mem_to_mem).build(self._resolve_reg(dst), self._resolve_reg('special'))
-        self.instructions.append(mov_to_special + Instruction([built]))
+
+        ret = mov_to_special + Instruction([built])
+        ret.comment = f'add {dst}, {src}'
+        self.instructions.append(ret)
 
     def put_add(self, dst: Register, src: Register):
         l.info(f'add {dst}, {src}')
         built = self._select(self.add_mem_to_mem).build(self._resolve_reg(dst), self._resolve_reg(src))
-        self.instructions.append(Instruction([built]))
+
+        ret = Instruction([built])
+        ret.comment = f'add {dst}, {src}'
+        self.instructions.append(ret)
 
     def put_sub(self, dst: Register, src: Immediate):
         self.put_add(dst, Immediate(-src))
@@ -146,50 +187,77 @@ class RopTarget(Target):
     def put_sub(self, dst: Register, src: Register):
         l.info(f'sub {dst}, {src}')
         built = self._select(self.sub_mem_by_mem).build(self._resolve_reg(dst), self._resolve_reg(src), self._temp1())
-        self.instructions.append(Instruction([built]))
+
+        ret = Instruction([built])
+        ret.comment = f'sub {dst}, {src}'
+        self.instructions.append(ret)
 
     def put_load(self, dst: Register, src: Immediate):
         l.info(f'load {dst}, {src}')
         mov_to_special = self._imm_to_special(src)
         built = self._select(self.mov_deref_mem_ptr_to_mem).build(self._resolve_reg(dst), self._resolve_reg('special'), self._temp1(), self._data_base())
-        self.instructions.append(mov_to_special + Instruction([built]))
+
+        ret = mov_to_special + Instruction([built])
+        ret.comment = f'load {dst}, {src}'
+        self.instructions.append(ret)
 
     def put_load(self, dst: Register, src: Register):
         l.info(f'load {dst}, {src}')
         built = self._select(self.mov_deref_mem_ptr_to_mem).build(self._resolve_reg(dst), self._resolve_reg(src), self._temp1(), self._data_base())
-        self.instructions.append(Instruction([built]))
+
+        ret = Instruction([built])
+        ret.comment = f'load {dst}, {src}'
+        self.instructions.append(ret)
 
     def put_store(self, src: Register, dst: Immediate):
         l.info(f'store {src}, {dst}')
         mov_to_special = self._imm_to_special(dst)
         built = self._select(self.mov_mem_to_deref_mem_ptr).build(self._resolve_reg('special'), self._resolve_reg(src), self._temp1(), self._temp2(), self._data_base())
-        self.instructions.append(mov_to_special + Instruction([built]))
+
+        ret = mov_to_special + Instruction([built])
+        ret.comment = f'store {src}, {dst}'
+        self.instructions.append(ret)
 
     def put_store(self, src: Register, dst: Register):
         l.info(f'store {src}, {dst}')
         built = self._select(self.mov_mem_to_deref_mem_ptr).build(self._resolve_reg(dst), self._resolve_reg(src), self._temp1(), self._temp2(), self._data_base())
-        self.instructions.append(Instruction([built]))
+
+        ret = Instruction([built])
+        ret.comment = f'store {src}, {dst}'
+        self.instructions.append(ret)
     
     def put_putc(self, src: Immediate):
         l.info(f'putc {src}')
         mov_to_special = self._imm_to_special(src)
         built = self._select(self.putchar_mem).build(self._resolve_reg('special'))
-        self.instructions.append(mov_to_special + Instruction([built]))
+
+        ret = mov_to_special + Instruction([built])
+        ret.comment = f'putc {src}'
+        self.instructions.append(ret)
 
     def put_putc(self, src: Register):
         l.info(f'putc {src}')
         built = self._select(self.putchar_mem).build(self._resolve_reg(src))
-        self.instructions.append(Instruction([built]))
+
+        ret = Instruction([built])
+        ret.comment = f'putc {src}'
+        self.instructions.append(ret)
 
     def put_getc(self, dst: Register):
         l.info(f'getc {dst}')
         built = self._select(self.getchar_mem).build(self._resolve_reg(dst))
-        self.instructions.append(Instruction([built]))
+
+        ret = Instruction([built])
+        ret.comment = f'getc {dst}'
+        self.instructions.append(ret)
 
     def put_exit(self):
         l.info(f'exit')
         built = self._select(self.exit).build()
-        self.instructions.append(Instruction([built]))
+
+        ret = Instruction([built])
+        ret.comment = 'exit'
+        self.instructions.append(ret)
 
     def put_conditional_jmp(self, jmp: Immediate, dst: Register, src: Immediate, cc: ConditionCode):
         l.info(f'jmp({cc}) {jmp}, {dst}, {src}')
@@ -211,19 +279,25 @@ class RopTarget(Target):
         built = jump_chain.build(int(jmp), *args)
 
         inst = Instruction(mov_to_special.chains + [built], jump_chain, int(jmp), args)
-        self.instructions.append(inst)
+
+        ret = inst
+        ret.comment = f'jmp({cc}) {jmp}, {dst}, {src}'
+        self.instructions.append(ret)
 
     def put_conditional_jmp(self, jmp: Immediate, dst: Register, src: Register, cc: ConditionCode):
         l.info(f'jmp({cc}) {jmp}, {dst}, {src}')
         l.error('Tried to jump to register')
-        raise NotImplementedError('c-to-rop does not support jumping to register yet')
+        # raise NotImplementedError('c-to-rop does not support jumping to register yet')
 
     def put_unconditional_jmp(self, jmp: Immediate):
         l.info(f'jmp {jmp}')
         args = (None, None, None, None)
         jump_chain = self._select(self.jump_to_imm)
         built = jump_chain.build(int(jmp), *args)
-        self.instructions.append(Instruction([built], jump_chain, int(jmp), args))
+
+        ret = Instruction([built], jump_chain, int(jmp), args)
+        ret.comment = f'jmp {jmp}'
+        self.instructions.append(ret)
 
     def put_cmp(self, dst: Register, src: Immediate, cc: ConditionCode):
         l.info(f'cmp({cc}) {dst}, {src}')
@@ -240,7 +314,9 @@ class RopTarget(Target):
 
         built = self._select(func).build(self._resolve_reg(dst), self._resolve_reg('special'), self._temp1())
 
-        self.instructions.append(mov_to_special + Instruction([built]))
+        ret = mov_to_special + Instruction([built])
+        ret.comment = f'cmp({cc}) {dst}, {src}'
+        self.instructions.append(ret)
 
     def put_cmp(self, dst: Register, src: Register, cc: ConditionCode):
         l.info(f'cmp({cc}) {dst}, {src}')
@@ -255,10 +331,23 @@ class RopTarget(Target):
         }[cc]
 
         built = self._select(func).build(self._resolve_reg(dst), self._resolve_reg(src), self._temp1())
-        self.instructions.append(Instruction([built]))
+
+        ret = Instruction([built])
+        ret.comment = f'cmp({cc}) {dst}, {src}'
+        self.instructions.append(ret)
 
     def build(self):
         ret = ''
-        for instruction in self.instructions:
-            ret += instruction.build_string()
-        return 'from pwn import *\n\n' + ret.replace('\nchain = ""', '').replace('= ""', '= b""')
+
+        l.info('Exporting...')
+        
+        # with open(fname, 'w') as f:
+        for i, instruction in enumerate(tqdm(self.instructions)):
+            try:
+                ret += ('# ' + instruction.comment + '\n')
+                ret += instruction.build_string()
+                # f.write('\n')
+            except Exception as e:
+                print(f'Fucked up instruction {i} has comment {instruction.comment}')
+                print(e)
+        return 'from pwn import *\n\nchain = b""\n\n' + ret.replace('\nchain = ""', '').replace('= ""', '= b""')

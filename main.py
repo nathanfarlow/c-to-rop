@@ -40,7 +40,6 @@ if __name__ == '__main__':
     target = RopTarget(finder, data_base, rop_base)
     driver = Driver(elvm_ir, target)
     target.fill_jump_targets(driver.data_setup_inst_count)
-
+    
     with open(output_file, 'w') as f:
-        payload = target.build()
-        f.write(payload)
+        f.write(target.build())

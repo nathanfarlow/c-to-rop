@@ -1,0 +1,1406 @@
+Attaching to c-to-rop_c-to-rop_1
+[36mc-to-rop_1  |[0m /usr/local/lib/python3.8/dist-packages/itanium_demangler-1.0-py3.8.egg/itanium_demangler/__init__.py:635: SyntaxWarning: "is not" with a literal. Did you mean "!="?
+[36mc-to-rop_1  |[0m /usr/local/lib/python3.8/dist-packages/itanium_demangler-1.0-py3.8.egg/itanium_demangler/__init__.py:637: SyntaxWarning: "is not" with a literal. Did you mean "!="?
+[36mc-to-rop_1  |[0m /usr/local/lib/python3.8/dist-packages/itanium_demangler-1.0-py3.8.egg/itanium_demangler/__init__.py:639: SyntaxWarning: "is not" with a literal. Did you mean "!="?
+[36mc-to-rop_1  |[0m /usr/local/lib/python3.8/dist-packages/itanium_demangler-1.0-py3.8.egg/itanium_demangler/__init__.py:635: SyntaxWarning: "is not" with a literal. Did you mean "!="?
+[36mc-to-rop_1  |[0m /usr/local/lib/python3.8/dist-packages/itanium_demangler-1.0-py3.8.egg/itanium_demangler/__init__.py:637: SyntaxWarning: "is not" with a literal. Did you mean "!="?
+[36mc-to-rop_1  |[0m /usr/local/lib/python3.8/dist-packages/itanium_demangler-1.0-py3.8.egg/itanium_demangler/__init__.py:639: SyntaxWarning: "is not" with a literal. Did you mean "!="?
+[36mc-to-rop_1  |[0m WARNING | 2021-07-05 22:39:29,267 | [36mcle.loader[0m | [36mThe main binary is a position-independent executable. It is being loaded with a base address of 0x400000.[0m
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x200e + base)	# add byte ptr [rax - 0x7b], cl; sal byte ptr [rdx + rax - 1], 0xd0; add rsp, 8; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x2011 + base)	# sal byte ptr [rdx + rax - 1], 0xd0; add rsp, 8; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x2016 + base)	# add rsp, 8; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x201a + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m [angrop] Timeout
+[36mc-to-rop_1  |[0m [angrop] Timeout
+[36mc-to-rop_1  |[0m [angrop] Timeout
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27d1 + base)	# mov eax, dword ptr [rsp + 0x34]; add rsp, 0x78; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27d2 + base)	# and al, 0x34; add rsp, 0x78; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27d3 + base)	# and al, 0x34; add rsp, 0x78; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27d5 + base)	# add rsp, 0x78; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27d9 + base)	# pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27da + base)	# pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27db + base)	# pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27dd + base)	# pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27de + base)	# pop rbp; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27df + base)	# pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27e0 + base)	# pop rsi; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27e1 + base)	# pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27e2 + base)	# pop rdi; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x27e3 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x2a72 + base)	# add byte ptr [rax + 0x39], cl; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x2a75 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x2bf7 + base)	# adc byte ptr [rbx - 0x7bf0fd08], al; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x2bfd + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3286 + base)	# cmp rax, -0x7ab80000; sal byte ptr [rcx + rcx - 1], 0xe0; nop dword ptr [rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3287 + base)	# cmp eax, 0x85480000; sal byte ptr [rcx + rcx - 1], 0xe0; nop dword ptr [rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3289 + base)	# add byte ptr [rax - 0x7b], cl; sal byte ptr [rcx + rcx - 1], 0xe0; nop dword ptr [rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x328c + base)	# sal byte ptr [rcx + rcx - 1], 0xe0; nop dword ptr [rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x328f + base)	# jmp rax
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3291 + base)	# nop dword ptr [rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3293 + base)	# add byte ptr [rax], 0; add byte ptr [rax], al; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3294 + base)	# add byte ptr [rax], al; add byte ptr [rax], al; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3296 + base)	# add byte ptr [rax], al; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3298 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x32c8 + base)	# cmp eax, 0x85480000; sal byte ptr [rax + rcx - 1], 0xe0; nop word ptr [rax + rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x32ca + base)	# add byte ptr [rax - 0x7b], cl; sal byte ptr [rax + rcx - 1], 0xe0; nop word ptr [rax + rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x32cd + base)	# sal byte ptr [rax + rcx - 1], 0xe0; nop word ptr [rax + rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x32d0 + base)	# jmp rax
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x32d2 + base)	# nop word ptr [rax + rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x32d3 + base)	# nop dword ptr [rax + rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x32d5 + base)	# add byte ptr [rax], r8b; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x32d6 + base)	# add byte ptr [rax], al; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x32d8 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x330b + base)	# inc esi; add eax, 0x3e55; add dword ptr [rbp - 0x3d], ebx; nop dword ptr [rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x330c + base)	# mov byte ptr [rip + 0x3e55], 1; pop rbp; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x330d + base)	# add eax, 0x3e55; add dword ptr [rbp - 0x3d], ebx; nop dword ptr [rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x330f + base)	# add byte ptr ds:[rax], al; add dword ptr [rbp - 0x3d], ebx; nop dword ptr [rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3310 + base)	# add byte ptr [rax], al; add dword ptr [rbp - 0x3d], ebx; nop dword ptr [rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3311 + base)	# add byte ptr [rcx], al; pop rbp; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3312 + base)	# add dword ptr [rbp - 0x3d], ebx; nop dword ptr [rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3313 + base)	# pop rbp; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3314 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3315 + base)	# nop dword ptr [rax]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3318 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x351e + base)	# pop rax; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x351f + base)	# pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3520 + base)	# pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3521 + base)	# pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3523 + base)	# pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3524 + base)	# pop rbp; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3525 + base)	# pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3526 + base)	# pop rsi; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3527 + base)	# pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3528 + base)	# pop rdi; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3529 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x35d9 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x35dc + base)	# dec dword ptr [rax - 0x77]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x35df + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3608 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x361e + base)	# mov rax, qword ptr [rsp + 8]; add rsp, 0x38; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x361f + base)	# mov eax, dword ptr [rsp + 8]; add rsp, 0x38; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3620 + base)	# and al, 8; add rsp, 0x38; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3621 + base)	# and al, 8; add rsp, 0x38; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3623 + base)	# add rsp, 0x38; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3626 + base)	# cmp byte ptr [rbx + 0x5d], bl; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3627 + base)	# pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3628 + base)	# pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3629 + base)	# pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x362b + base)	# pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x362c + base)	# pop rbp; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x362d + base)	# pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x362e + base)	# pop rsi; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x362f + base)	# pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3630 + base)	# pop rdi; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3631 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3674 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m [angrop] Timeout
+[36mc-to-rop_1  |[0m [angrop] Timeout
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36a7 + base)	# ror byte ptr [rdi], 0x84; ret 0
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36aa + base)	# ret 0
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36c4 + base)	# add rsp, 8; xor eax, eax; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36c8 + base)	# xor eax, eax; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36ca + base)	# pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36cb + base)	# pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36cc + base)	# pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36ce + base)	# pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36cf + base)	# pop rbp; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36d0 + base)	# pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36d1 + base)	# pop rsi; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36d2 + base)	# pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36d3 + base)	# pop rdi; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x36d4 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3791 + base)	# add rsp, 8; mov eax, 1; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3794 + base)	# or byte ptr [rax + 1], bh; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3795 + base)	# mov eax, 1; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3796 + base)	# add dword ptr [rax], eax; add byte ptr [rax], al; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3797 + base)	# add byte ptr [rax], al; add byte ptr [rbx + 0x5d], bl; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3798 + base)	# add byte ptr [rax], al; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3799 + base)	# add byte ptr [rbx + 0x5d], bl; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x379a + base)	# pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x379b + base)	# pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x379c + base)	# pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x379e + base)	# pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x379f + base)	# pop rbp; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37a0 + base)	# pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37a1 + base)	# pop rsi; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37a2 + base)	# pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37a3 + base)	# pop rdi; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37a4 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37bb + base)	# nop dword ptr [rax + rax]; endbr64 ; mov qword ptr [rip + 0x39a5], rdi; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37bd + base)	# add byte ptr [rax], r8b; endbr64 ; mov qword ptr [rip + 0x39a5], rdi; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37be + base)	# add byte ptr [rax], al; endbr64 ; mov qword ptr [rip + 0x39a5], rdi; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37c0 + base)	# endbr64 ; mov qword ptr [rip + 0x39a5], rdi; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37c4 + base)	# mov qword ptr [rip + 0x39a5], rdi; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37c5 + base)	# mov dword ptr [rip + 0x39a5], edi; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37c6 + base)	# cmp eax, 0x39a5; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37c8 + base)	# cmp dword ptr [rax], eax; add bl, al; nop dword ptr [rax]; endbr64 ; mov rax, qword ptr [rip + 0x3995]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37c9 + base)	# add byte ptr [rax], al; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37ca + base)	# add bl, al; nop dword ptr [rax]; endbr64 ; mov rax, qword ptr [rip + 0x3995]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37cb + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37cc + base)	# nop dword ptr [rax]; endbr64 ; mov rax, qword ptr [rip + 0x3995]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37d0 + base)	# endbr64 ; mov rax, qword ptr [rip + 0x3995]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37d4 + base)	# mov rax, qword ptr [rip + 0x3995]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37d5 + base)	# mov eax, dword ptr [rip + 0x3995]; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37d6 + base)	# add eax, 0x3995; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37d9 + base)	# add byte ptr [rax], al; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x37db + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x391d + base)	# add dword ptr [rax - 0x7d], ecx; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3920 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3928 + base)	# pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3929 + base)	# pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x392a + base)	# pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x392c + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3acf + base)	# sub byte ptr [rax - 0x77], cl; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3ad2 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3b4f + base)	# add byte ptr [rax], al; add byte ptr [rbp + 0xc], dh; add rsp, 0xd0; pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3b51 + base)	# add byte ptr [rbp + 0xc], dh; add rsp, 0xd0; pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3b54 + base)	# add rsp, 0xd0; pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3b57 + base)	# rol byte ptr [rax], 1; add byte ptr [rax], al; pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3b58 + base)	# add byte ptr [rax], al; add byte ptr [rbx + 0x5d], bl; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3b59 + base)	# add byte ptr [rax], al; pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3b5a + base)	# add byte ptr [rbx + 0x5d], bl; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3b5b + base)	# pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3b5c + base)	# pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3b5d + base)	# pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3b5f + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3bb7 + base)	# add rsp, 8; mov rax, r12; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3bba + base)	# or byte ptr [rcx + rcx*4 - 0x20], cl; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3bbb + base)	# mov rax, r12; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3bbc + base)	# mov eax, esp; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3bbe + base)	# pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3bbf + base)	# pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3bc1 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3c8f + base)	# sub byte ptr [rax - 0x77], cl; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3c92 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3cfc + base)	# add byte ptr [rax], al; add byte ptr [rbp + 0xc], dh; add rsp, 0xd0; pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3cfe + base)	# add byte ptr [rbp + 0xc], dh; add rsp, 0xd0; pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d01 + base)	# add rsp, 0xd0; pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d04 + base)	# rol byte ptr [rax], 1; add byte ptr [rax], al; pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d05 + base)	# add byte ptr [rax], al; add byte ptr [rbx + 0x5d], bl; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d06 + base)	# add byte ptr [rax], al; pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d07 + base)	# add byte ptr [rbx + 0x5d], bl; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d08 + base)	# pop rbx; pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d09 + base)	# pop rbp; pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d0a + base)	# pop r12; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d0c + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d29 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d6f + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d76 + base)	# add rsp, 8; pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d79 + base)	# or byte ptr [rbx + 0x5d], bl; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d7a + base)	# pop rbx; pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d7b + base)	# pop rbp; pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d7c + base)	# pop r12; pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d7e + base)	# pop r13; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d7f + base)	# pop rbp; pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d80 + base)	# pop r14; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d81 + base)	# pop rsi; pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d82 + base)	# pop r15; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d83 + base)	# pop rdi; ret 
+[36mc-to-rop_1  |[0m chain += p64(0x0)
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d84 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d85 + base)	# nop word ptr cs:[rax + rax]; endbr64 ; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d86 + base)	# nop word ptr cs:[rax + rax]; endbr64 ; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d87 + base)	# nop dword ptr cs:[rax + rax]; endbr64 ; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d88 + base)	# nop dword ptr [rax + rax]; endbr64 ; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d8a + base)	# test byte ptr [rax], al; add byte ptr [rax], al; add byte ptr [rax], al; endbr64 ; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d8c + base)	# add byte ptr [rax], al; add byte ptr [rax], al; endbr64 ; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d8e + base)	# add byte ptr [rax], al; endbr64 ; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d90 + base)	# endbr64 ; ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_1  |[0m base = 0x0
+[36mc-to-rop_1  |[0m chain = ""
+[36mc-to-rop_1  |[0m chain += p64(0x3d94 + base)	# ret 
+[36mc-to-rop_1  |[0m 
+[36mc-to-rop_c-to-rop_1 exited with code 0
+[0m
